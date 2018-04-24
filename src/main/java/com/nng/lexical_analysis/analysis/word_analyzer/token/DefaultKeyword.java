@@ -70,6 +70,7 @@ public enum DefaultKeyword implements Keyword{
      */
     TRUNCATE,
 
+
     /*
     Drop
      */
