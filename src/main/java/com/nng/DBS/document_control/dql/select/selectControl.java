@@ -16,17 +16,11 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.Commo
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.SelectItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Table;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dql.select.SelectStatement;
-import com.nng.lexical_analysis.analysis.mean_analyzer.token.SQLToken;
-import com.nng.lexical_analysis.analysis.mean_analyzer.token.TableToken;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
-import com.nng.lexical_analysis.analysis.word_analyzer.token.Keyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
-import com.nng.lexical_analysis.analysis.word_analyzer.token.TokenType;
-import com.nng.lexical_analysis.api.ShardingValue;
 import com.nng.lexical_analysis.contact.ShardingOperator;
 import com.nng.unit.readJson;
 import com.nng.unit.removeDuplicate;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.io.*;
 import java.util.*;
