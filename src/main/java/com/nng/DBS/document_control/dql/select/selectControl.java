@@ -153,6 +153,7 @@ public class selectControl {
 
         deal_where();
 
+        deal_groupby();
     for(columnsType oo:crossjoinTables.getColumnsContent())
     {
         for(Object pp:oo.getItem())
@@ -420,6 +421,11 @@ public class selectControl {
 
     private void deal_groupby()throws Exception
     {
+        if(groupByItems.isEmpty())
+        {
+            System.out.println("kongde");
+            return;
+        }
         if(groupByItems.size()>1)
         {
             throw new Exception("sorry,group by only support 1 item now");

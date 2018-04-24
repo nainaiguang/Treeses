@@ -27,6 +27,7 @@ public class crossjoinTable {
     //每一行
     private List<columnsType> columnsContent=new ArrayList<>();
 
+    private GroupbyResult groupbyResults;
 
     //不同表同名情况也不怕，靠在笛卡尔中列的位置来辨认
     public void addTable(Table_contact table_contact)
@@ -817,5 +818,16 @@ public class crossjoinTable {
             throw new SQLDictionaryException(columnname);
         }
 
+        List<Object> results=new ArrayList<>();
+        for(int i=0;i<this.columnsContent.size();i++) {
+            columnsType temp=columnsContent.get(i);
+            System.out.println(results.indexOf(temp.getItem().get(columnplace)));
+            if(results.indexOf(temp.getItem().get(columnplace))==-1)
+            {
+                results.add(temp.getItem().get(columnplace));
+            }
+        }
+        this.groupbyResults=new GroupbyResult(tablename,columnname,columnplace,results);
+        System.out.println(results);
     }
 }

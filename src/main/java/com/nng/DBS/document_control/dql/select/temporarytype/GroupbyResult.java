@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class groupbyResult {
+public class GroupbyResult {
     private String table_name;//分组属于哪一个表的
     private String column_name;//列名
     private int place;//分组再笛卡尔中的位置的位置
