@@ -351,8 +351,8 @@ public class selectControl {
         //处理列相等的事务
         deal_on();
         deal_equalORNotequal();
-
     }
+
 
     /**
      * 处理条件与条件相等的情况
@@ -394,7 +394,7 @@ public class selectControl {
      * 1.等于的值数据类型可不可以比较
      * @throws Exception
      */
-    public void deal_equalORNotequal()throws Exception
+    private void deal_equalORNotequal()throws Exception
     {
         Iterator iter = conditions.getConditions().entrySet().iterator();
         while (iter.hasNext()) {
@@ -418,7 +418,15 @@ public class selectControl {
         }
     }
 
+    private void deal_groupby()throws Exception
+    {
+        if(groupByItems.size()>1)
+        {
+            throw new Exception("sorry,group by only support 1 item now");
+        }
+        this.crossjoinTables.GroupBy(this.groupByItems.get(0));
 
+    }
 
     /**
      * 取出当前的column 在原来里面是第几个

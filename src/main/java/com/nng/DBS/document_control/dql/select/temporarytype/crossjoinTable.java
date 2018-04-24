@@ -2,7 +2,9 @@ package com.nng.DBS.document_control.dql.select.temporarytype;
 
 import com.google.common.collect.Range;
 import com.nng.DBS.dictionary.domParser.tableparser.TablerParser;
+import com.nng.DBS.dictionary.exception.SQLDictionaryException;
 import com.nng.DBS.document_control.documentException;
+import com.nng.lexical_analysis.analysis.mean_analyzer.relation.OrderItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Condition;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
@@ -573,7 +575,6 @@ public class crossjoinTable {
                 }
             }
 
-
         }
 
 
@@ -794,6 +795,26 @@ public class crossjoinTable {
             {
                 throw new documentException(dictionType,userType,1);
             }
+        }
+
+    }
+
+
+    /**
+     * 对Groupby进行处理，只支持一个组
+     * 使用前需要首先判断不为空
+     * @param orderItem
+     * @throws Exception
+     */
+    public void GroupBy(OrderItem orderItem) throws Exception
+    {
+        String tablename=orderItem.getOwner().orNull();
+        String columnname=orderItem.getName().orNull();
+        System.out.println(tablename);
+        int columnplace=getColumnPlace(tablename,columnname);
+        if(columnplace==-1)
+        {
+            throw new SQLDictionaryException(columnname);
         }
 
     }
