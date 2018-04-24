@@ -430,7 +430,7 @@ public class selectControl {
         {
             throw new Exception("sorry,group by only support 1 item now");
         }
-        this.crossjoinTables.GroupBy(this.groupByItems.get(0));
+        this.crossjoinTables.GroupBy(selectStatement.getTables(),groupByItems.get(0));
 
     }
 

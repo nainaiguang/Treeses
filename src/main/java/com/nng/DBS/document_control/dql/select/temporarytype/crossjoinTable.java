@@ -6,6 +6,8 @@ import com.nng.DBS.dictionary.exception.SQLDictionaryException;
 import com.nng.DBS.document_control.documentException;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.OrderItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Condition;
+import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Table;
+import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Tables;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
 import com.nng.lexical_analysis.api.ShardingValue;
@@ -804,24 +806,66 @@ public class crossjoinTable {
     /**
      * 对Groupby进行处理，只支持一个组
      * 使用前需要首先判断不为空
+     * 如果没有表名  判断from的表
+     * 1.列没有重复，
+     * 2.列存在
+     * 3.表是否存在
+     * 4.别名是否存在在表中
      * @param orderItem
      * @throws Exception
      */
-    public void GroupBy(OrderItem orderItem) throws Exception
+    public void GroupBy(Tables tables,OrderItem orderItem) throws Exception
     {
         String tablename=orderItem.getOwner().orNull();
         String columnname=orderItem.getName().orNull();
-        System.out.println(tablename);
-        int columnplace=getColumnPlace(tablename,columnname);
-        if(columnplace==-1)
+
+        Table lingshi=tables.find(tablename).orNull();//通过表名或者别名找出表 4.
+        if(lingshi!=null)
         {
-            throw new SQLDictionaryException(columnname);
+            tablename=lingshi.getName();
         }
+
+
+        List<String> tablenames=new ArrayList<>();//所有表的名称
+        //所有查询表的表名称
+        for(String table:tables.getTableNames())
+        {
+            tablenames.add(table);
+        }
+
+
+
+        int checkcolumnIntableNumber=0;//判断列在不同表中一共出现了几次
+        //1，2
+        if(tablename==null) {
+            String columnInWhatTable=null;
+            for (String tableN : tablenames) {
+                if (existcolumn(columnname, TablerParser.getInstance().get_column(tableN))) {//列是否存在在某个表内
+                    checkcolumnIntableNumber++;
+                    columnInWhatTable = tableN;
+                }
+            }
+
+            if (checkcolumnIntableNumber == 0) {
+                throw new SQLDictionaryException(columnname);
+            } else if (checkcolumnIntableNumber > 1) {
+                throw new SQLDictionaryException(columnname, 'i');
+            }
+            tablename = columnInWhatTable;
+        }
+        if(tablenames.indexOf(tablename)==-1)//3
+        {
+            throw new SQLDictionaryException(tablename);
+        }
+
+        System.out.println(tablename);
+
+        int columnplace=getColumnPlace(tablename,columnname);
+
 
         List<Object> results=new ArrayList<>();
         for(int i=0;i<this.columnsContent.size();i++) {
             columnsType temp=columnsContent.get(i);
-            System.out.println(results.indexOf(temp.getItem().get(columnplace)));
             if(results.indexOf(temp.getItem().get(columnplace))==-1)
             {
                 results.add(temp.getItem().get(columnplace));
@@ -829,5 +873,60 @@ public class crossjoinTable {
         }
         this.groupbyResults=new GroupbyResult(tablename,columnname,columnplace,results);
         System.out.println(results);
+    }
+
+    /**
+     *某个字段是否在另外字段里
+     * @param columnname
+     * @param columns
+     * @return
+     */
+    private Boolean existcolumn(String columnname,List<String> columns)
+    {
+        if(columns.indexOf(columnname)==-1)
+            return false;
+        else return true;
+    }
+
+    /**
+     *values 为输入值 其中Interger 为编号，不用管
+     * 根据object  对list里面的Map进行排序，interger的值不用变
+     * 如一开始
+     * list里面的值是
+     * <1,b>
+     * <2,a>
+     * <3,e>
+     * <4,d>
+     * <5,c>
+     *
+     * 排序后的值为
+     *
+     * <2,a>
+     * <1,b>
+     * <5,c>
+     * <4,d>
+     * <3,e>
+     *
+     * 键值对还是和原来一样，但是根据object进行排序
+     *
+     * object有5种类型，1，string,2.char,3.int,4.double,5,float
+     * type参数表示这5种类型
+     * type.equals("CLASS JAVA.LANG.INTEGER")
+     * type.equals("CLASS JAVA.LANG.FLOAT")
+     * type.equals("CLASS JAVA.LANG.DOUBLE"))
+     * type.equals("CLASS JAVA.LANG.CHARACTER")
+     * type.equals("CLASS JAVA.LANG.STRING")
+     *
+     * ordertype 为升序降序  其中有两种
+     * values.equals.("ASC")
+     * values.equals.("DESC")
+     *
+     * 返回参数和输入参数的list一样的类型即可
+     *
+     * 注意一个问题  深拷贝浅拷贝的问题，不要对values 直接进行排序，会出错，新建一个List<Map<Integer,Object>>用来存结果
+     */
+    public List<Map<Integer,Object>> rank(List<Map<Integer,Object>> values,String ordertype,String type)
+    {
+        return null;
     }
 }

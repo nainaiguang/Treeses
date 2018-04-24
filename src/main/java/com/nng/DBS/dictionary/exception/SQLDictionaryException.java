@@ -12,7 +12,7 @@ public class SQLDictionaryException extends TreesesException {
     
     private static final String UNMATCH_MESSAGE = "SQL not find error, not find is '%s'";
     private static final String UNTABLE_MESSAGE = "SQL existed error, existed is '%s'";
-    
+    private static final String MOREMUTCH_MESSAGE = "SQL existed error, the '%s' existed not only one";
 
     
     public SQLDictionaryException(final String message, final Object... args) {
@@ -24,6 +24,9 @@ public class SQLDictionaryException extends TreesesException {
     }
     public SQLDictionaryException(final String obj,int i) {
         super(String.format(UNTABLE_MESSAGE, obj));
+    }
+    public SQLDictionaryException(final String obj,char i ){
+        super(String.format(MOREMUTCH_MESSAGE , obj));
     }
 
 }
