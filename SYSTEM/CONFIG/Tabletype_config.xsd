@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:element name="tables">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="table" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="table_name" type="xs:string"/>
+							<xs:element name="owner" type="xs:string"/>
+							<xs:element name="jurisdiction" type="xs:string"/>
+							<xs:element name="address" type="xs:string"/>
+							<xs:element name="alias" type="xs:string"/>
+							<xs:element name="columns">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="column" minOccurs="0" maxOccurs="unbounded">
+										<xs:complexType>
+										<xs:attribute name="name" type="xs:string"/>
+										<xs:attribute name="type" type="xs:string"/>
+										</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
