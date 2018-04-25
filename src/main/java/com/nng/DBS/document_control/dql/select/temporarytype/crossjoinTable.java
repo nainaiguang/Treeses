@@ -2,8 +2,8 @@ package com.nng.DBS.document_control.dql.select.temporarytype;
 
 import com.google.common.collect.Range;
 import com.nng.DBS.dictionary.domParser.tableparser.TablerParser;
-import com.nng.DBS.dictionary.exception.SQLDictionaryException;
-import com.nng.DBS.document_control.documentException;
+import com.nng.exception.SQLDictionaryException;
+import com.nng.exception.documentException;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.OrderItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Condition;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.SelectItem;
@@ -29,6 +29,11 @@ public class crossjoinTable {
     private List<table_structure> table_structures=new ArrayList<>();
     //每一行
     private List<columnsType> columnsContent=new ArrayList<>();
+
+    //结果表的每一个
+    private List<table_structure> resultTable_structures=new ArrayList<>();
+    //结果每一行
+    private List<columnsType> resultColumnsContent=new ArrayList<>();
 
     private GroupbyResult groupbyResults;
 
@@ -883,15 +888,169 @@ public class crossjoinTable {
      * 2.有聚合，没有group by
      * 3.没聚合,有group by
      * 4.有聚合，有group by
-     * @param tems
+     * 5.*
+     *
+     * class com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.AggregationSelectItem
+     * class com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.CommonSelectItem
+     * @param items
      * @throws Exception
      */
-    public void deal_Selectitem(List<SelectItem> tems) throws Exception
+    //结果表的每一个
+    //resultTable_structures
+    //结果每一行
+    //resultColumnsContent
+    public void Selectitem(List<SelectItem> items,boolean star,Tables tables) throws Exception
     {
+        for(int i=0;i<items.size();i++)
+        {
+            System.out.println(items.get(i).getExpression());
+            System.out.println(items.get(i).getClass());
+        }
+
+        System.out.println(getTableandColumnFromselectItem(items,tables));
+
 
     }
 
+    /**
+     * 配套表名和列名
+     * 1.同一个表的同一个列不能重复
+     * SelectItem项只能是common的
+     * @return Map<表名，列名>
+     * @throws Exception
+     */
+    private List<Map<String,String>> getTableandColumnFromselectItem(List<SelectItem> items,Tables tables)throws Exception {
+        List<Map<String, String>> result = new ArrayList<>();
+        for (SelectItem selectItem : items) {
 
+            String[] fenkai = strToArray(selectItem.getExpression());
+            if (fenkai[fenkai.length - 1].equals("*"))//如果是*的情况
+            {
+                if (fenkai.length == 1)//长度为1，添加所有表所有列
+                {
+                    for (table_structure structure : this.table_structures) {
+                        for (String columnname : structure.getColumns_name()) {
+                            Map<String, String> one = new HashMap<String, String>();
+                            one.put(structure.getTable_name(), columnname);
+                            result.add(one);
+                        }
+                    }
+                } else if (fenkai.length == 2) {//判断表存在，添加这个表的所有列
+                    if (tables.find(fenkai[0]).isPresent())//如果表存在
+                    {
+                        String tablename=tables.find(fenkai[0]).orNull().getName();
+                        for (table_structure structure : this.table_structures) {
+                            if (tablename.equals(structure.getTable_name())) {//把这个表的全部列添加进来
+                                for (String columnname : structure.getColumns_name()) {
+                                    Map<String, String> one = new HashMap<String, String>();
+                                    one.put(structure.getTable_name(), columnname);
+                                    result.add(one);
+                                }
+                            }
+                        }
+                    } else {
+                        throw new documentException(fenkai[0], 1);
+                    }
+                }
+            } else {
+                String tablename = null;
+                if (fenkai.length == 1) {
+                    tablename = getTablenameByColumn(fenkai[0]);
+                    if (tablename == null) {
+                        throw new documentException(fenkai[0], 1);
+                    }
+                } else if (fenkai.length == 2) {
+                    //判断表是否存在
+                    if (tables.find(fenkai[0]).isPresent()) {
+                        tablename = tables.find(fenkai[0]).orNull().getName();
+                        if (tablename == null) {
+                            throw new documentException(fenkai[1], 1);
+                        }
+                    } else {
+                        throw new documentException(fenkai[0], 1);
+                    }
+                }
+
+                Map<String, String> one = new HashMap<String, String>();
+                if(fenkai.length == 1) {
+                    one.put(tablename, fenkai[0]);
+                }
+                if(fenkai.length==2)
+                {
+                    one.put(tablename, fenkai[1]);
+                }
+                result.add(one);
+            }
+
+        }
+
+        boolean right=true;//判断是否有重复值
+        int length1=result.size();
+
+        result=removeDuplicateWithOrder(result);
+
+        int length2=result.size();
+
+        if(length1!=length2)
+        {
+            throw new Exception("SQL error ,Duplicate selectitem.");
+        }
+
+        return  result;
+    }
+
+    // 删除ArrayList中重复元素，保持顺序
+    private List removeDuplicateWithOrder(List list) {
+        Set set = new HashSet();
+        List newList = new ArrayList();
+        for (Iterator iter = list.iterator(); iter.hasNext();) {
+            Object element = iter.next();
+            if (set.add(element))
+                newList.add(element);
+        }
+        list.clear();
+        list.addAll(newList);
+        return list;
+    }
+
+
+    /**
+     * 返回列在哪个表中，如果是多个表都有则返回null,有 表.列不可用
+     * @param columnname
+     * @return
+     */
+    private String getTablenameByColumn(String columnname)
+    {
+        int count=0;//计数
+        String resultTable=null;
+        for(table_structure structure:this.table_structures)
+        {
+            for(String obj:structure.getColumns_name())
+            {
+                if(columnname.equals(obj))
+                {
+                    count++;
+                    resultTable=structure.getTable_name();
+                }
+            }
+        }
+        if(count>1)
+        {
+            return null;
+        }
+        return  resultTable;
+    }
+
+    //分开表名与项
+    public String[] strToArray(String str) {
+        StringTokenizer st = new StringTokenizer(str, ".");
+        String[] strArray = new String[st.countTokens()];
+        int strLeng = st.countTokens();
+        for (int i=0; i<strLeng; i++) {
+            strArray[i] = st.nextToken();
+        }
+        return strArray;
+    }
 
 
 

@@ -2,8 +2,8 @@ package com.nng.DBS.document_control.dql.select;
 
 import com.google.common.base.Optional;
 import com.nng.DBS.dictionary.domParser.tableparser.TablerParser;
-import com.nng.DBS.dictionary.exception.SQLDictionaryException;
-import com.nng.DBS.document_control.documentException;
+import com.nng.exception.SQLDictionaryException;
+import com.nng.exception.documentException;
 import com.nng.DBS.document_control.dql.select.temporarytype.Table_contact;
 import com.nng.DBS.document_control.dql.select.temporarytype.columnsType;
 import com.nng.DBS.document_control.dql.select.temporarytype.crossjoinTable;
@@ -154,6 +154,9 @@ public class selectControl {
         deal_where();
 
         deal_groupby();
+
+        deal_selectitem();
+
     for(columnsType oo:crossjoinTables.getColumnsContent())
     {
         for(Object pp:oo.getItem())
@@ -423,7 +426,6 @@ public class selectControl {
     {
         if(groupByItems.isEmpty())
         {
-            System.out.println("kongde");
             return;
         }
         if(groupByItems.size()>1)
@@ -431,7 +433,11 @@ public class selectControl {
             throw new Exception("sorry,group by only support 1 item now");
         }
         this.crossjoinTables.GroupBy(selectStatement.getTables(),groupByItems.get(0));
+    }
 
+    private void deal_selectitem()throws Exception
+    {
+        this.crossjoinTables.Selectitem(items,this.star,selectStatement.getTables());
     }
 
     /**
@@ -446,16 +452,6 @@ public class selectControl {
                 return i;
         }
        return -1;
-    }
-
-
-
-    /**
-     * 识别出最后的应该存放在结果中的列
-     */
-    private void dealResultItem()
-    {
-        List<SelectItem> items=selectStatement.getItems();
     }
 
 
@@ -533,13 +529,20 @@ public class selectControl {
             Boolean check=false;
             if(selectItem.getClass().getName().equals(CommonSelectItem.class.getName()))
             {
-                if(selectItem.getExpression().equals("*"))//星号则通过
+                String[] temp=strToArray(selectItem.getExpression());
+                if(temp[temp.length-1].equals("*"))//星号则通过
                 {
                     check=true;
                 }
                for(String column_name:columns)
                {
-                   if(column_name.equals(selectItem.getExpression()))//如果列存在在表中，则没有错
+                   String[] its= strToArray(selectItem.getExpression());
+                   int itss=its.length;
+                   if(itss>2)
+                   {
+                       throw new Exception("SQL statement error \""+selectItem.getExpression()+"\"");
+                   }
+                   if(column_name.equals(its[itss-1]))//如果列存在在表中，则没有错
                    {
                        check=true;
                    }
@@ -559,6 +562,16 @@ public class selectControl {
         judge_repetition_alia();
         //4
         ConditionscolumnExists();
+    }
+
+    private String[] strToArray(String str) {
+        StringTokenizer st = new StringTokenizer(str, ".");
+        String[] strArray = new String[st.countTokens()];
+        int strLeng = st.countTokens();
+        for (int i=0; i<strLeng; i++) {
+            strArray[i] = st.nextToken();
+        }
+        return strArray;
     }
 
     /**

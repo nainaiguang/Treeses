@@ -1,6 +1,6 @@
 package com.nng.DBS.document_control.dql.select.temporarytype;
 
-import com.nng.DBS.document_control.AggregateException;
+import com.nng.exception.AggregateException;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package com.nng.DBS.document_control.dml.insert;
 
 import com.nng.DBS.dictionary.domParser.tableparser.TablerParser;
-import com.nng.DBS.document_control.documentException;
+import com.nng.exception.documentException;
 import com.nng.exception.TreesesException;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Column;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Condition;

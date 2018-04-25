@@ -1,4 +1,4 @@
-package com.nng.DBS.document_control;
+package com.nng.exception;
 
 import com.nng.exception.TreesesException;
 

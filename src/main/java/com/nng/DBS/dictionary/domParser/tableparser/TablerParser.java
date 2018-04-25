@@ -1,11 +1,10 @@
 package com.nng.DBS.dictionary.domParser.tableparser;
 
 import com.nng.DBS.dictionary.domParser.Domparser;
-import com.nng.DBS.dictionary.exception.SQLDictionaryException;
+import com.nng.exception.SQLDictionaryException;
 import com.nng.DBS.dictionary.type.Tabletype;
 
 import com.nng.DBS.jurisdiction.Jurisdiction;
-import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Table;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -16,7 +15,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 

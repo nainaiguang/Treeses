@@ -1,4 +1,4 @@
-package com.nng.DBS.dictionary.exception;
+package com.nng.exception;
 
 
 import com.nng.exception.TreesesException;
