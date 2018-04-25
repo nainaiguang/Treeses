@@ -127,5 +127,7 @@ public class domtext {
         Object A=55;
         double B=Double.parseDouble(A.toString());
         System.out.print(B);
+
+
     }
 }

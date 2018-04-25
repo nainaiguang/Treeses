@@ -6,6 +6,7 @@ import com.nng.DBS.dictionary.exception.SQLDictionaryException;
 import com.nng.DBS.document_control.documentException;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.OrderItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Condition;
+import com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.SelectItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Table;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Tables;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
@@ -874,6 +875,45 @@ public class crossjoinTable {
         this.groupbyResults=new GroupbyResult(tablename,columnname,columnplace,results);
         System.out.println(results);
     }
+
+
+    /**
+     * select item
+     * 1.没有聚合，没有group by
+     * 2.有聚合，没有group by
+     * 3.没聚合,有group by
+     * 4.有聚合，有group by
+     * @param tems
+     * @throws Exception
+     */
+    public void deal_Selectitem(List<SelectItem> tems) throws Exception
+    {
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      *某个字段是否在另外字段里
