@@ -2,6 +2,7 @@ package com.nng.DBS.document_control.dql.select;
 
 import com.google.common.base.Optional;
 import com.nng.DBS.dictionary.domParser.tableparser.TablerParser;
+import com.nng.DBS.document_control.dql.select.temporarytype.selectItemResult;
 import com.nng.exception.SQLDictionaryException;
 import com.nng.exception.documentException;
 import com.nng.DBS.document_control.dql.select.temporarytype.Table_contact;
@@ -162,6 +163,16 @@ public class selectControl {
         for(Object pp:oo.getItem())
         {
             System.out.print(pp+"\t");
+        }
+        System.out.println();
+    }
+
+    for(selectItemResult sl:crossjoinTables.getResultTable_structures())
+    {
+        System.out.printf(sl.getItemname()+":");
+        for(Object obj:sl.getColumn_content())
+        {
+            System.out.printf(obj+"\t");
         }
         System.out.println();
     }

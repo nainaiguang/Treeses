@@ -2,17 +2,21 @@ package com.nng.DBS.document_control.dql.select.temporarytype;
 
 import com.google.common.collect.Range;
 import com.nng.DBS.dictionary.domParser.tableparser.TablerParser;
+import com.nng.exception.AggregateException;
 import com.nng.exception.SQLDictionaryException;
 import com.nng.exception.documentException;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.OrderItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Condition;
+import com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.AggregationSelectItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.SelectItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Table;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Tables;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
 import com.nng.lexical_analysis.api.ShardingValue;
+import com.nng.lexical_analysis.contact.AggregationType;
 import com.nng.lexical_analysis.contact.ShardingOperator;
+import com.nng.unit.Aggregate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.poi.ss.formula.functions.T;
@@ -31,11 +35,14 @@ public class crossjoinTable {
     private List<columnsType> columnsContent=new ArrayList<>();
 
     //结果表的每一个
-    private List<table_structure> resultTable_structures=new ArrayList<>();
+    private List<selectItemResult> resultTable_structures=new ArrayList<>();
     //结果每一行
     private List<columnsType> resultColumnsContent=new ArrayList<>();
 
     private GroupbyResult groupbyResults;
+
+    private Boolean Aggregat=false;
+    private Boolean Groupby=false;
 
     //不同表同名情况也不怕，靠在笛卡尔中列的位置来辨认
     public void addTable(Table_contact table_contact)
@@ -878,7 +885,7 @@ public class crossjoinTable {
             }
         }
         this.groupbyResults=new GroupbyResult(tablename,columnname,columnplace,results);
-        System.out.println(results);
+        Groupby=true;//设置有groupby项
     }
 
 
@@ -901,16 +908,316 @@ public class crossjoinTable {
     //resultColumnsContent
     public void Selectitem(List<SelectItem> items,boolean star,Tables tables) throws Exception
     {
-        for(int i=0;i<items.size();i++)
+        /**
+         * 判断别名有没有重复
+         */
+        List<String> alia=new ArrayList<>();//所有别名
+        for(SelectItem o:items)//取存在的别名
         {
-            System.out.println(items.get(i).getExpression());
-            System.out.println(items.get(i).getClass());
+            if (strToArray(o.getExpression())[strToArray(o.getExpression()).length-1].equals("*")&&(o.getAlias().orNull()!=null))
+            {
+                throw new Exception("SQL error ,* can not have alia");
+            }
+            if(o.getAlias().isPresent()) {
+                alia.add(o.getAlias().orNull());
+            }
+        }
+        int aliasize=alia.size();
+        alia=removeDuplicateWithOrder(alia);
+        if(aliasize!=aliasize)
+        {
+            throw new Exception("Duplicate alia name");
         }
 
-        System.out.println(getTableandColumnFromselectItem(items,tables));
 
+        for(int i=0;i<items.size();i++)//看看有没有聚合
+        {
+            if(items.get(i).getClass().toString().equals("class com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.AggregationSelectItem"))
+            {
+                Aggregat=true;
+            }
+        }
+
+
+
+
+
+        if(Groupby==false&&Aggregat==false)//无group by，无聚合
+        {
+            List<Map<String, String>> resultColumnName = getTableandColumnFromselectItem(items, tables);//输出的item
+
+
+            List<Integer> place=new ArrayList<>();//要查询项的位置
+
+            for(Map<String,String> tc:resultColumnName)
+            {
+                String tname=null;
+                String cname=null;
+
+                //取表和列的键值对
+                Iterator iter = tc.entrySet().iterator();
+                while (iter.hasNext()) {
+                 Map.Entry entry = (Map.Entry) iter.next();
+                    tname = (String) entry.getKey();
+                    cname = (String) entry.getValue();
+                break;
+                 }
+                 place.add(getColumnPlace(tname,cname));
+            }
+
+            System.out.println(place);//place为在笛卡尔表中的位置
+
+
+            for(int pl:place)
+            {
+                int i=0;
+                for(table_structure tt:table_structures)
+                {
+                    for(String mm:tt.getColumns_name())
+                    {
+                        if(i==pl)
+                        {
+                            selectItemResult ItemResult= new selectItemResult(tt.getTable_name(),mm);
+
+                            /**
+                             * 添加别名
+                             */
+                            for(SelectItem temp:items)
+                            {
+                                if(temp.getExpression().equals(tt.getTable_name()+"."+mm))
+                                {
+                                    ItemResult.setItemname(temp.getAlias().orNull());
+                                }
+                            }
+                            for(columnsType col:this.columnsContent)
+                            {
+                                ItemResult.getColumn_content().add(col.getItem().get(pl));
+                            }
+                            this.resultTable_structures.add(ItemResult);
+
+                        }
+                            i++;
+                    }
+                }
+            }
+
+        }
+
+
+
+
+        else if(Groupby==true&&Aggregat==false)//有group by，无聚合
+        {
+            List<Map<String, String>> resultColumnName = getTableandColumnFromselectItem(items, tables);//输出的item
+            for(Map<String,String> tc:resultColumnName)
+            {
+                String tname=null;
+                String cname=null;
+                //取表和列的键值对
+                Iterator iter = tc.entrySet().iterator();
+                while (iter.hasNext()) {
+
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    tname = (String) entry.getKey();
+                    cname = (String) entry.getValue();
+                    break;
+                }
+                if(!(tname.equals(groupbyResults.getTable_name())&&cname.equals(groupbyResults.getColumn_name())))
+                {
+                    throw new Exception("SQL exception ,select item is not in group by");
+                }
+                selectItemResult ItemResult= new selectItemResult(groupbyResults.getTable_name(),groupbyResults.getColumn_name());
+
+               if(items.get(0).getAlias().isPresent())
+               {
+                   ItemResult.setItemname(items.get(0).getAlias().orNull());
+               }
+                for(Object obj:this.groupbyResults.getGroupbyResult())
+                {
+                    ItemResult.getColumn_content().add(obj);
+                }
+                this.resultTable_structures.add(ItemResult);
+            }
+
+        }
+
+
+
+
+
+        else if(Groupby==false&&Aggregat==true)//无group by，有聚合
+        {
+            //有聚合不能有其他项
+            for(SelectItem selectItem:items)
+            {
+                if(selectItem.getClass().toString().equals("class com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.CommonSelectItem"))
+                {
+                    throw new Exception("SQL error,In Aggregated without GROUP BY");
+                }
+            }
+
+            for(SelectItem selectItem:items)
+            {
+                String tblname=null;
+                String colname=null;
+                String innerExpress=((AggregationSelectItem)selectItem).getInnerExpression();
+                innerExpress=innerExpress.substring(1,innerExpress.length()-1);//去除括号
+                System.out.println(innerExpress);
+                String[] inner=strToArray(innerExpress);
+                if(inner.length==1)
+                {
+                    tblname=getTablenameByColumn(inner[0]);
+                    System.out.println(inner[0]+"::::::");
+                    colname=inner[0];
+                }
+                else if(inner.length==2)
+                {
+                    if(tables.find(inner[0]).isPresent())//表是否存在
+                    {
+                        tblname=tables.find(inner[0]).orNull().getName();
+                        colname=inner[1];
+                    }
+                    else
+                    {
+                        throw new documentException(inner[0], 1);
+                    }
+                }
+
+                if(((AggregationSelectItem)selectItem).getType().equals(AggregationType.SUM))
+                {
+                    List<Double> sum=SUM(tblname,colname,groupbyResults);
+                    selectItemResult ItemResult= new selectItemResult(tblname,colname);
+                    ItemResult.setItemname(selectItem.getAlias().orNull());
+                    ItemResult.setColumn_content(Collections.singletonList(sum));
+                    this.resultTable_structures.add(ItemResult);
+                }
+                else if(((AggregationSelectItem)selectItem).getType().equals(AggregationType.COUNT))
+                {
+                    List<Integer> count=COUNT(tblname,colname,groupbyResults);
+                    selectItemResult ItemResult= new selectItemResult(tblname,colname);
+                    ItemResult.setItemname(selectItem.getAlias().orNull());
+                    ItemResult.setColumn_content(Collections.singletonList(count));
+                    this.resultTable_structures.add(ItemResult);
+                }
+                else if(((AggregationSelectItem)selectItem).getType().equals(AggregationType.MAX))
+                {
+                    List<Object> max=MAX(tblname,colname,groupbyResults);
+                    selectItemResult ItemResult= new selectItemResult(tblname,colname);
+                    ItemResult.setItemname(selectItem.getAlias().orNull());
+                    ItemResult.setColumn_content(Collections.singletonList(max));
+                    this.resultTable_structures.add(ItemResult);
+                }
+                else if(((AggregationSelectItem)selectItem).getType().equals(AggregationType.MIN))
+                {
+                    List<Object> min=MIN(tblname,colname,groupbyResults);
+                    selectItemResult ItemResult= new selectItemResult(tblname,colname);
+                    ItemResult.setItemname(selectItem.getAlias().orNull());
+                    ItemResult.setColumn_content(Collections.singletonList(min));
+                    this.resultTable_structures.add(ItemResult);
+                }
+            }
+
+        }
+
+
+
+
+
+        else if(Groupby==true&&Aggregat==true)//有group by，有聚合
+        {
+
+            for(SelectItem selectItem:items) {
+                if (selectItem.getClass().toString().equals("com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.CommonSelectItem")) {
+                    String tblname = null;
+                    String colname = null;
+                    String innerExpress = (selectItem).getExpression();
+                    String[] inner = strToArray(innerExpress);
+                    if (inner.length == 1) {
+                        tblname = getTablenameByColumn(inner[0]);
+                        colname = inner[0];
+                    } else if (inner.length == 2) {
+                        if (tables.find(inner[0]).isPresent())//表是否存在
+                        {
+                            tblname = tables.find(inner[0]).orNull().getName();
+                            colname = inner[1];
+                        } else {
+                            throw new documentException(inner[0], 1);
+                        }
+                    }
+                    if(!(tblname.equals(groupbyResults.getTable_name())&&colname.equals(groupbyResults.getColumn_name())))
+                    {
+                        throw new Exception("SQL error,In Aggregated without GROUP BY");
+                    }
+
+                    selectItemResult ItemResult= new selectItemResult(groupbyResults.getTable_name(),groupbyResults.getColumn_name());
+                    ItemResult.setItemname(selectItem.getAlias().orNull());
+                    ItemResult.setColumn_content(groupbyResults.getGroupbyResult());
+                    this.resultTable_structures.add(ItemResult);
+
+
+                } else if (selectItem.getClass().toString().equals("com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.CommonSelectItem")) {
+                    String tblname = null;
+                    String colname = null;
+                    /**
+                     * 设置tblname 和 colname
+                     */
+                    String innerExpress = ((AggregationSelectItem) selectItem).getInnerExpression();
+                    innerExpress = innerExpress.substring(1, innerExpress.length() - 1);//去除括号
+                    String[] inner = strToArray(innerExpress);
+                    if (inner.length == 1) {
+                        tblname = getTablenameByColumn(inner[0]);
+                        colname = inner[0];
+                    } else if (inner.length == 2) {
+                        if (tables.find(inner[0]).isPresent())//表是否存在
+                        {
+                            tblname = tables.find(inner[0]).orNull().getName();
+                            colname = inner[1];
+                        } else {
+                            throw new documentException(inner[0], 1);
+                        }
+                    }
+                    if (((AggregationSelectItem) selectItem).getType().equals(AggregationType.SUM)) {
+                        List<Double> sum = SUM(tblname, colname, groupbyResults);
+                        selectItemResult ItemResult = new selectItemResult(tblname, colname);
+                        ItemResult.setItemname(selectItem.getAlias().orNull());
+                        ItemResult.setColumn_content(Collections.singletonList(sum));
+                        this.resultTable_structures.add(ItemResult);
+                    } else if (((AggregationSelectItem) selectItem).getType().equals(AggregationType.COUNT)) {
+                        List<Integer> count = COUNT(tblname, colname, groupbyResults);
+                        selectItemResult ItemResult = new selectItemResult(tblname, colname);
+                        ItemResult.setItemname(selectItem.getAlias().orNull());
+                        ItemResult.setColumn_content(Collections.singletonList(count));
+                        this.resultTable_structures.add(ItemResult);
+                    } else if (((AggregationSelectItem) selectItem).getType().equals(AggregationType.MAX)) {
+                        List<Object> max = MAX(tblname, colname, groupbyResults);
+                        selectItemResult ItemResult = new selectItemResult(tblname, colname);
+                        ItemResult.setItemname(selectItem.getAlias().orNull());
+                        ItemResult.setColumn_content(Collections.singletonList(max));
+                        this.resultTable_structures.add(ItemResult);
+                    } else if (((AggregationSelectItem) selectItem).getType().equals(AggregationType.MIN)) {
+                        List<Object> min = MIN(tblname, colname, groupbyResults);
+                        selectItemResult ItemResult = new selectItemResult(tblname, colname);
+                        ItemResult.setItemname(selectItem.getAlias().orNull());
+                        ItemResult.setColumn_content(Collections.singletonList(min));
+                        this.resultTable_structures.add(ItemResult);
+                    } else if (((AggregationSelectItem) selectItem).getType().equals(AggregationType.AVG)) {
+                        List<Double> agv = AGV(tblname, colname, groupbyResults);
+                        selectItemResult ItemResult = new selectItemResult(tblname, colname);
+                        ItemResult.setItemname(selectItem.getAlias().orNull());
+                        ItemResult.setColumn_content(Collections.singletonList(agv));
+                        this.resultTable_structures.add(ItemResult);
+                    }
+                }
+            }
+        }
 
     }
+
+    /**
+     * 根据位置获取第几列
+     * @return
+     */
+    private List<columnsType> getresultColumnsContent(List<Integer> places){return  null;}
 
     /**
      * 配套表名和列名
@@ -1013,7 +1320,6 @@ public class crossjoinTable {
         return list;
     }
 
-
     /**
      * 返回列在哪个表中，如果是多个表都有则返回null,有 表.列不可用
      * @param columnname
@@ -1041,6 +1347,7 @@ public class crossjoinTable {
         return  resultTable;
     }
 
+
     //分开表名与项
     public String[] strToArray(String str) {
         StringTokenizer st = new StringTokenizer(str, ".");
@@ -1053,9 +1360,357 @@ public class crossjoinTable {
     }
 
 
+    /**
+     * 获取第几列的所有元素
+     * @param i
+     * @return
+     */
+    private List<Object> getcontentbyIndex(int i)
+    {
+        List<Object> result=new ArrayList<>();
+        for(columnsType columnsTypes:this.columnsContent)
+        {
+            result.add(columnsTypes.getItem().get(i));
+        }
+        return result;
+    }
+    /**
+     *聚合函数群
+     */
+    public  List<Double> SUM(String tablename,String columnname,GroupbyResult groupbyResult) throws Exception {
+        List<Double> result=new ArrayList<>();//最后的结果
+        int AGplace=getColumnPlace(tablename,columnname);
+        String AGtype=TablerParser.getInstance().get_column_type(tablename,columnname);
+        if(AGtype.equals("VARCHAR")||AGtype.equals(("CHAR")))//判断支持类型
+        {
+            throw new AggregateException("SUM",AGtype);
+        }
 
+        if(groupbyResult!=null) {
+            String GType = TablerParser.getInstance().get_column_type(groupbyResult.getTable_name(), groupbyResult.getColumn_name());//group by 的类型需要判断
+            if (GType.equals("INT") || GType.equals("DOUBLE") || GType.equals("FLOAT")) {
+                for (Object gResults : groupbyResult.getGroupbyResult())//一个个取出group by中的值
+                {
+                    Double gResult = Double.parseDouble(gResults.toString());
+                    List<Object> intable = getcontentbyIndex(groupbyResult.getPlace());//取出笛卡尔中group里的那一列
+                    List<Integer> columnWhathang = new ArrayList<>();
+                    for (int i = 0; i < intable.size(); i++) {
+                        if (Double.parseDouble(intable.get(i).toString()) == gResult)//和group by 的某个值相等，则放入他在第几列
+                        {
+                            columnWhathang.add(i);
+                        }
+                    }
 
+                    List<Object> aglist = getcontentbyIndex(AGplace);
+                    List<Object> putInAG = new ArrayList<>();
+                    for (int i : columnWhathang) {
+                        putInAG.add(aglist.get(i));
+                    }
 
+                    Double res = Aggregate.SUM(putInAG);
+                    result.add(res);
+                }
+            }
+            else if(GType.equals("CHAR") || GType.equals("VARCHAR"))
+            {
+                for (Object gResults : groupbyResult.getGroupbyResult())//一个个取出group by中的值
+                {
+                    String gResult = gResults.toString();
+                    List<Object> intable = getcontentbyIndex(groupbyResult.getPlace());//取出笛卡尔中group里的那一列
+                    List<Integer> columnWhathang = new ArrayList<>();
+                    for (int i = 0; i < intable.size(); i++) {
+                        if (intable.get(i).toString().equals(gResult))//和group by 的某个值相等，则放入他在第几列
+                        {
+                            columnWhathang.add(i);
+                        }
+                    }
+                    List<Object> aglist = getcontentbyIndex(AGplace);
+                    List<Object> putInAG = new ArrayList<>();
+                    for (int i : columnWhathang) {
+                        putInAG.add(aglist.get(i));
+                    }
+                    Double res = Aggregate.SUM(putInAG);
+                    result.add(res);
+                }
+            }
+        }
+        else //无聚合
+        {
+            List<Object> aglist = getcontentbyIndex(AGplace);
+            Double res = Aggregate.SUM(aglist);
+            result.add(res);
+        }
+
+        return result;
+    }
+
+    public  List<Integer> COUNT(String tablename,String columnname,GroupbyResult groupbyResult) throws Exception
+    {
+        List<Integer> result=new ArrayList<>();//最后的结果
+        int AGplace=getColumnPlace(tablename,columnname);
+
+        if(groupbyResult!=null) {
+            String GType = TablerParser.getInstance().get_column_type(groupbyResult.getTable_name(), groupbyResult.getColumn_name());//group by 的类型需要判断
+            if (GType.equals("INT") || GType.equals("DOUBLE") || GType.equals("FLOAT")) {
+                for (Object gResults : groupbyResult.getGroupbyResult())//一个个取出group by中的值
+                {
+                    Double gResult = Double.parseDouble(gResults.toString());
+                    List<Object> intable = getcontentbyIndex(groupbyResult.getPlace());//取出笛卡尔中group里的那一列
+                    List<Integer> columnWhathang = new ArrayList<>();
+                    for (int i = 0; i < intable.size(); i++) {
+                        if (Double.parseDouble(intable.get(i).toString()) == gResult)//和group by 的某个值相等，则放入他在第几列
+                        {
+                            columnWhathang.add(i);
+                        }
+                    }
+
+                    List<Object> aglist = getcontentbyIndex(AGplace);
+                    List<Object> putInAG = new ArrayList<>();
+                    for (int i : columnWhathang) {
+                        putInAG.add(aglist.get(i));
+                    }
+
+                    int res = Aggregate.COUNT(putInAG);
+                    result.add(res);
+                }
+            }
+            else if(GType.equals("CHAR") || GType.equals("VARCHAR"))
+            {
+                for (Object gResults : groupbyResult.getGroupbyResult())//一个个取出group by中的值
+                {
+                    String gResult = gResults.toString();
+                    List<Object> intable = getcontentbyIndex(groupbyResult.getPlace());//取出笛卡尔中group里的那一列
+                    List<Integer> columnWhathang = new ArrayList<>();
+                    for (int i = 0; i < intable.size(); i++) {
+                        if (intable.get(i).toString().equals(gResult))//和group by 的某个值相等，则放入他在第几列
+                        {
+                            columnWhathang.add(i);
+                        }
+                    }
+                    List<Object> aglist = getcontentbyIndex(AGplace);
+                    List<Object> putInAG = new ArrayList<>();
+                    for (int i : columnWhathang) {
+                        putInAG.add(aglist.get(i));
+                    }
+                    int res = Aggregate.COUNT(putInAG);
+                    result.add(res);
+                }
+            }
+        }
+        else //无聚合
+        {
+            List<Object> aglist = getcontentbyIndex(AGplace);
+            int res = Aggregate.COUNT(aglist);
+            result.add(res);
+        }
+
+        return result;
+    }
+
+    public  List<Object> MAX(String tablename,String columnname,GroupbyResult groupbyResult) throws Exception
+    {
+        List<Object> result=new ArrayList<>();//最后的结果
+        int AGplace=getColumnPlace(tablename,columnname);
+        String AGtype=TablerParser.getInstance().get_column_type(tablename,columnname);
+        if(AGtype.equals("VARCHAR")||AGtype.equals(("CHAR")))//判断支持类型
+        {
+            throw new AggregateException("MAX",AGtype);
+        }
+
+        if(groupbyResult!=null) {
+            String GType = TablerParser.getInstance().get_column_type(groupbyResult.getTable_name(), groupbyResult.getColumn_name());//group by 的类型需要判断
+            if (GType.equals("INT") || GType.equals("DOUBLE") || GType.equals("FLOAT")) {
+                for (Object gResults : groupbyResult.getGroupbyResult())//一个个取出group by中的值
+                {
+                    Double gResult = Double.parseDouble(gResults.toString());
+                    List<Object> intable = getcontentbyIndex(groupbyResult.getPlace());//取出笛卡尔中group里的那一列
+                    List<Integer> columnWhathang = new ArrayList<>();
+                    for (int i = 0; i < intable.size(); i++) {
+                        if (Double.parseDouble(intable.get(i).toString()) == gResult)//和group by 的某个值相等，则放入他在第几列
+                        {
+                            columnWhathang.add(i);
+                        }
+                    }
+
+                    List<Object> aglist = getcontentbyIndex(AGplace);
+                    List<Object> putInAG = new ArrayList<>();
+                    for (int i : columnWhathang) {
+                        putInAG.add(aglist.get(i));
+                    }
+
+                    Object res = Aggregate.MAX(putInAG);
+                    result.add(res);
+                }
+            }
+            else if(GType.equals("CHAR") || GType.equals("VARCHAR"))
+            {
+                for (Object gResults : groupbyResult.getGroupbyResult())//一个个取出group by中的值
+                {
+                    String gResult = gResults.toString();
+                    List<Object> intable = getcontentbyIndex(groupbyResult.getPlace());//取出笛卡尔中group里的那一列
+                    List<Integer> columnWhathang = new ArrayList<>();
+                    for (int i = 0; i < intable.size(); i++) {
+                        if (intable.get(i).toString().equals(gResult))//和group by 的某个值相等，则放入他在第几列
+                        {
+                            columnWhathang.add(i);
+                        }
+                    }
+                    List<Object> aglist = getcontentbyIndex(AGplace);
+                    List<Object> putInAG = new ArrayList<>();
+                    for (int i : columnWhathang) {
+                        putInAG.add(aglist.get(i));
+                    }
+                    Object res = Aggregate.MAX(putInAG);
+                    result.add(res);
+                }
+            }
+        }
+        else //无聚合
+        {
+            List<Object> aglist = getcontentbyIndex(AGplace);
+            Object res = Aggregate.MAX(aglist);
+            result.add(res);
+        }
+
+        return result;
+    }
+
+    public  List<Object> MIN(String tablename,String columnname,GroupbyResult groupbyResult) throws Exception
+    {
+        List<Object> result=new ArrayList<>();//最后的结果
+        int AGplace=getColumnPlace(tablename,columnname);
+        String AGtype=TablerParser.getInstance().get_column_type(tablename,columnname);
+        if(AGtype.equals("VARCHAR")||AGtype.equals(("CHAR")))//判断支持类型
+        {
+            throw new AggregateException("MIN",AGtype);
+        }
+
+        if(groupbyResult!=null) {
+            String GType = TablerParser.getInstance().get_column_type(groupbyResult.getTable_name(), groupbyResult.getColumn_name());//group by 的类型需要判断
+            if (GType.equals("INT") || GType.equals("DOUBLE") || GType.equals("FLOAT")) {
+                for (Object gResults : groupbyResult.getGroupbyResult())//一个个取出group by中的值
+                {
+                    Double gResult = Double.parseDouble(gResults.toString());
+                    List<Object> intable = getcontentbyIndex(groupbyResult.getPlace());//取出笛卡尔中group里的那一列
+                    List<Integer> columnWhathang = new ArrayList<>();
+                    for (int i = 0; i < intable.size(); i++) {
+                        if (Double.parseDouble(intable.get(i).toString()) == gResult)//和group by 的某个值相等，则放入他在第几列
+                        {
+                            columnWhathang.add(i);
+                        }
+                    }
+
+                    List<Object> aglist = getcontentbyIndex(AGplace);
+                    List<Object> putInAG = new ArrayList<>();
+                    for (int i : columnWhathang) {
+                        putInAG.add(aglist.get(i));
+                    }
+
+                    Object res = Aggregate.MIN(putInAG);
+                    result.add(res);
+                }
+            }
+            else if(GType.equals("CHAR") || GType.equals("VARCHAR"))
+            {
+                for (Object gResults : groupbyResult.getGroupbyResult())//一个个取出group by中的值
+                {
+                    String gResult = gResults.toString();
+                    List<Object> intable = getcontentbyIndex(groupbyResult.getPlace());//取出笛卡尔中group里的那一列
+                    List<Integer> columnWhathang = new ArrayList<>();
+                    for (int i = 0; i < intable.size(); i++) {
+                        if (intable.get(i).toString().equals(gResult))//和group by 的某个值相等，则放入他在第几列
+                        {
+                            columnWhathang.add(i);
+                        }
+                    }
+                    List<Object> aglist = getcontentbyIndex(AGplace);
+                    List<Object> putInAG = new ArrayList<>();
+                    for (int i : columnWhathang) {
+                        putInAG.add(aglist.get(i));
+                    }
+                    Object res = Aggregate.MIN(putInAG);
+                    result.add(res);
+                }
+            }
+        }
+        else //无聚合
+        {
+            List<Object> aglist = getcontentbyIndex(AGplace);
+            Object res = Aggregate.MIN(aglist);
+            result.add(res);
+        }
+
+        return result;
+
+    }
+
+    public  List<Double> AGV(String tablename,String columnname,GroupbyResult groupbyResult) throws Exception
+    {
+        List<Double> result=new ArrayList<>();//最后的结果
+        int AGplace=getColumnPlace(tablename,columnname);
+        String AGtype=TablerParser.getInstance().get_column_type(tablename,columnname);
+        if(AGtype.equals("VARCHAR")||AGtype.equals(("CHAR")))//判断支持类型
+        {
+            throw new AggregateException("SUM",AGtype);
+        }
+
+        if(groupbyResult!=null) {
+            String GType = TablerParser.getInstance().get_column_type(groupbyResult.getTable_name(), groupbyResult.getColumn_name());//group by 的类型需要判断
+            if (GType.equals("INT") || GType.equals("DOUBLE") || GType.equals("FLOAT")) {
+                for (Object gResults : groupbyResult.getGroupbyResult())//一个个取出group by中的值
+                {
+                    Double gResult = Double.parseDouble(gResults.toString());
+                    List<Object> intable = getcontentbyIndex(groupbyResult.getPlace());//取出笛卡尔中group里的那一列
+                    List<Integer> columnWhathang = new ArrayList<>();
+                    for (int i = 0; i < intable.size(); i++) {
+                        if (Double.parseDouble(intable.get(i).toString()) == gResult)//和group by 的某个值相等，则放入他在第几列
+                        {
+                            columnWhathang.add(i);
+                        }
+                    }
+
+                    List<Object> aglist = getcontentbyIndex(AGplace);
+                    List<Object> putInAG = new ArrayList<>();
+                    for (int i : columnWhathang) {
+                        putInAG.add(aglist.get(i));
+                    }
+
+                    Double res = Aggregate.AGV(putInAG);
+                    result.add(res);
+                }
+            }
+            else if(GType.equals("CHAR") || GType.equals("VARCHAR"))
+            {
+                for (Object gResults : groupbyResult.getGroupbyResult())//一个个取出group by中的值
+                {
+                    String gResult = gResults.toString();
+                    List<Object> intable = getcontentbyIndex(groupbyResult.getPlace());//取出笛卡尔中group里的那一列
+                    List<Integer> columnWhathang = new ArrayList<>();
+                    for (int i = 0; i < intable.size(); i++) {
+                        if (intable.get(i).toString().equals(gResult))//和group by 的某个值相等，则放入他在第几列
+                        {
+                            columnWhathang.add(i);
+                        }
+                    }
+                    List<Object> aglist = getcontentbyIndex(AGplace);
+                    List<Object> putInAG = new ArrayList<>();
+                    for (int i : columnWhathang) {
+                        putInAG.add(aglist.get(i));
+                    }
+                    Double res = Aggregate.AGV(putInAG);
+                    result.add(res);
+                }
+            }
+        }
+        else //无聚合
+        {
+            List<Object> aglist = getcontentbyIndex(AGplace);
+            Double res = Aggregate.AGV(aglist);
+            result.add(res);
+        }
+
+        return result;
+    }
 
 
 

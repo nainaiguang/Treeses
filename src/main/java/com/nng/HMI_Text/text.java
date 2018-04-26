@@ -35,6 +35,7 @@ public class text {
                // textArea1.setText("");
                 SQLparsingEngine a=new SQLparsingEngine(sql);
                SQLStatement b= a.parse();
+                textArea2.setText("");
 
 
 
@@ -43,6 +44,7 @@ public class text {
                     selectControl selectControl =new selectControl((SelectStatement) b);
                 } catch (Exception e1) {
                     e1.printStackTrace();
+
                     textArea2.setText(e1.getMessage());
                 }
 
