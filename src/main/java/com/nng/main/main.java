@@ -1,4 +1,4 @@
-package com.nng.mian;
+package com.nng.main;
 
 import com.nng.HMI_Text.text;
 
