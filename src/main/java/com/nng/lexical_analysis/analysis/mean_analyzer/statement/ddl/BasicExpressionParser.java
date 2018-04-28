@@ -29,8 +29,6 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Basic expression parser.
- *
- * @author zhangliang
  */
 @RequiredArgsConstructor
 public final class BasicExpressionParser {
@@ -39,7 +37,6 @@ public final class BasicExpressionParser {
     
     /**
      * Parse expression.
-     *
      * @param sqlStatement SQL statement
      * @return expression
      */

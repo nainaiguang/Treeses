@@ -1803,4 +1803,258 @@ public class crossjoinTable {
     {
         return null;
     }
+
+
+
+    // private List<columnsType> columnsContent=new ArrayList<>();
+    private void updatechangeContent(String tablename,String columnname, Condition condition) throws Exception {
+        //string 写的类型
+        String dicTypes= TablerParser.getInstance().get_column_type(tablename,columnname);
+
+        int columnplace=getColumnPlace(tablename,columnname);//在笛卡尔表中第几列
+
+        Symbol symbol =condition.getSymbol();
+
+        //用处不大
+        List<String> haha=new ArrayList<>();
+        haha.add(columnname);
+
+        ShardingValue value=condition.getShardingValue(Collections.singletonList(haha));
+
+        Comparable<T> A=value.getValue();
+        String type=getType(A);//获取用户输入的类型
+
+        catchType(type,dicTypes);//判定用户输入的数据类型是否与字典里的相同
+
+        type=type.toUpperCase();//转成大写
+        List<Integer> move=new ArrayList<>();//用于存储不符合的列
+        if(type.equals("CLASS JAVA.LANG.INTEGER")||type.equals("CLASS JAVA.LANG.FLOAT")||type.equals("CLASS JAVA.LANG.DOUBLE"))//如果用户类型为这些类型
+        {
+            if(symbol==Symbol.EQ) {
+                if(type.equals("CLASS JAVA.LANG.INTEGER")) {//如果是int类型处理
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Integer.parseInt(A.toString()) == (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.FLOAT"))//如果是float类型处理
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Float.parseFloat(A.toString()) == (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.DOUBLE"))//double
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Double.parseDouble(A.toString()) == (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+            }
+            if(symbol==Symbol.LT_EQ){
+                if(type.equals("CLASS JAVA.LANG.INTEGER")) {//如果是int类型处理
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Integer.parseInt(A.toString()) >= ((Double.parseDouble(temp.getItem().get(columnplace).toString()))))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.FLOAT"))//如果是float类型处理
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Float.parseFloat(A.toString()) >= (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.DOUBLE"))//double
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Double.parseDouble(A.toString()) >= (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+            }
+            if(symbol==Symbol.LT){
+                if(type.equals("CLASS JAVA.LANG.INTEGER")) {//如果是int类型处理
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Integer.parseInt(A.toString()) > (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.FLOAT"))//如果是float类型处理
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Float.parseFloat(A.toString()) > (Double.parseDouble(temp.getItem().get(columnplace).toString())))){
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.DOUBLE"))//double
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Double.parseDouble(A.toString()) > (Double.parseDouble(temp.getItem().get(columnplace).toString())))){
+                            move.add(i);
+                        }
+                    }
+                }
+            }
+            if(symbol==Symbol.GT_EQ){
+                if(type.equals("CLASS JAVA.LANG.INTEGER")) {//如果是int类型处理
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Integer.parseInt(A.toString()) <= (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.FLOAT"))//如果是float类型处理
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Float.parseFloat(A.toString()) <= (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.DOUBLE"))//double
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Double.parseDouble(A.toString()) <= (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+            }
+            if(symbol==Symbol.GT){
+                if(type.equals("CLASS JAVA.LANG.INTEGER")) {//如果是int类型处理
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Integer.parseInt(A.toString()) < (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.FLOAT"))//如果是float类型处理
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Float.parseFloat(A.toString()) < (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.DOUBLE"))//double
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Double.parseDouble(A.toString()) < (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+            }
+            if(symbol==Symbol.BANG_EQ){
+                if(type.equals("CLASS JAVA.LANG.INTEGER")) {//如果是int类型处理
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Integer.parseInt(A.toString()) != (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.FLOAT"))//如果是float类型处理
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Float.parseFloat(A.toString()) != (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+                else if(type.equals("CLASS JAVA.LANG.DOUBLE"))//double
+                {
+                    for (int i = 0; i < this.columnsContent.size(); i++) {
+                        columnsType temp = columnsContent.get(i);
+                        if (!(Double.parseDouble(A.toString()) != (Double.parseDouble(temp.getItem().get(columnplace).toString())))) {
+                            move.add(i);
+                        }
+                    }
+                }
+            }
+            //其他符号再进行处理
+        }
+        else if(type.equals("CLASS JAVA.LANG.STRING"))//如果用户类型为这些类型
+        {
+            if(!((symbol==Symbol.EQ)||(symbol==Symbol.BANG_EQ)))//varchar,char只能是等于
+            {
+                throw new documentException(Symbol.EQ,symbol);
+            }
+            if(symbol==Symbol.EQ) {
+                for (int i = 0; i < this.columnsContent.size(); i++) {
+                    columnsType temp = columnsContent.get(i);
+                    if (!(temp.getItem().get(columnplace) + "").equals(A.toString())) {
+                        move.add(i);
+                    }
+                }
+            }
+            else if(symbol==Symbol.BANG_EQ){
+                for (int i = 0; i < this.columnsContent.size(); i++) {
+                    columnsType temp = columnsContent.get(i);
+                    if ((temp.getItem().get(columnplace) + "").equals(A.toString())) {
+                        move.add(i);
+                    }
+                }
+            }
+        }
+        else if(type.equals("CLASS JAVA.LANG.CHARACTER"))//如果用户类型为这些类型
+        {
+            if(!((symbol==Symbol.EQ)||(symbol==Symbol.BANG_EQ)))//varchar,char只能是等于
+            {
+                throw new documentException(Symbol.EQ,symbol);
+            }
+            if(symbol==Symbol.EQ) {
+                for (int i = 0; i < this.columnsContent.size(); i++) {
+                    columnsType temp = columnsContent.get(i);
+                    if (!((String) temp.getItem().get(columnplace)).equals((A.toString().charAt(0)) + "")) {
+                        move.add(i);
+                    }
+                }
+            }
+            else if(symbol==Symbol.BANG_EQ) {
+                for (int i = 0; i < this.columnsContent.size(); i++) {
+                    columnsType temp = columnsContent.get(i);
+                    if (((String) temp.getItem().get(columnplace)).equals((A.toString().charAt(0)) + "")) {
+                        move.add(i);
+                    }
+                }
+            }
+        }
+
+
+        /**
+         * 逆向移除不符合的行
+         */
+        for(int i=move.size()-1;i>=0;i--)
+        {
+            columnsContent.remove(columnsContent.get(move.get(i)));
+        }
+
+    }
 }

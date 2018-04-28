@@ -19,8 +19,7 @@ package com.nng.lexical_analysis.analysis.mean_analyzer.statement.ddl.create;
 
 /**
  * SQL clause parser interface.
- *
- * @author zhangliang
+
  */
 public interface SQLClauseParser {
 }

@@ -22,6 +22,7 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.token.TableToken;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.*;
 import com.nng.lexical_analysis.contact.AggregationType;
 import com.nng.lexical_analysis.contact.OrderType;
+import com.nng.lexical_analysis.contact.controlType;
 import com.nng.unit.SQLUtil;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -53,6 +54,7 @@ public abstract class AbstractSelectParser implements SQLStatementParser {
     public AbstractSelectParser(final SQLParser sqlParser) {
         this.sqlParser = sqlParser;
         selectStatement = new SelectStatement();
+        selectStatement.setControlType(controlType.SELECT);
     }
     
     @Override

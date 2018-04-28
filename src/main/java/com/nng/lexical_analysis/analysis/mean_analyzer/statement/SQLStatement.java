@@ -5,10 +5,13 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Condit
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Tables;
 import com.nng.lexical_analysis.analysis.mean_analyzer.token.SQLToken;
 import com.nng.lexical_analysis.contact.SQLType;
+import com.nng.lexical_analysis.contact.controlType;
 
 import java.util.List;
 
 public interface SQLStatement {
+    controlType getControlType();
+    void setControlType(controlType controlType);
     /**
      * 获取SQL语句类型.
      *

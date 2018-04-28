@@ -38,8 +38,7 @@ import java.util.List;
 
 /**
  * Table references clause parser.
- *
- * @author zhangliang
+
  */
 public class TableReferencesClauseParser implements SQLClauseParser {
     

@@ -29,8 +29,6 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Alias expression parser.
- *
- * @author zhangliang
  */
 @RequiredArgsConstructor
 public class AliasExpressionParser {

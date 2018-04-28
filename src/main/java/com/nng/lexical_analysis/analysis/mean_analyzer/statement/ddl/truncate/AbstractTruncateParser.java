@@ -7,6 +7,7 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.statement.SQLStatementPar
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.ddl.DDLStatement;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Keyword;
+import com.nng.lexical_analysis.contact.controlType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public abstract class AbstractTruncateParser implements SQLStatementParser {
     public AbstractTruncateParser(final SQLParser sqlParser) {
         this.sqlParser = sqlParser;
         truncateStatement = new DDLStatement();
+        truncateStatement.setControlType(controlType.TRUNCATE);
     }
     
     @Override

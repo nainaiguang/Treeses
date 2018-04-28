@@ -5,8 +5,10 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Condit
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Tables;
 import com.nng.lexical_analysis.analysis.mean_analyzer.token.SQLToken;
 import com.nng.lexical_analysis.contact.SQLType;
+import com.nng.lexical_analysis.contact.controlType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.LinkedList;
@@ -16,6 +18,10 @@ import java.util.List;
 @Getter
 @ToString
 public abstract class AbstractSQLStatement implements SQLStatement{
+    /**
+     * SQL 操作类型
+     */
+    private controlType controlType;
     /**
      * SQL 类型
      */
@@ -44,13 +50,11 @@ public abstract class AbstractSQLStatement implements SQLStatement{
         return type;
     }
 
-
-
-
-
-
-
-
+    @Override
+    public void setControlType(controlType controlType)
+    {
+        this.controlType=controlType;
+    }
     @Override
     public int getParametersIndex() {
         return 0;
@@ -62,6 +66,5 @@ public abstract class AbstractSQLStatement implements SQLStatement{
 
     @Override
     public void increaseParametersIndex() {
-
     }
 }

@@ -27,14 +27,13 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.statement.SQLStatementPar
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.ddl.DDLStatement;
 import com.nng.lexical_analysis.analysis.word_analyzer.Lexer;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.*;
+import com.nng.lexical_analysis.contact.controlType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
  * Create语句解析器.
- *
- * @author zhangliang
  */
 @RequiredArgsConstructor
 @Getter(AccessLevel.PROTECTED)
@@ -42,11 +41,12 @@ public abstract class AbstractCreateParser implements SQLStatementParser {
     
     private final SQLParser sqlParser;
     
-    private final DDLStatement createStatement;
+    private final createStatement createStatement;
     
     public AbstractCreateParser(final SQLParser sqlParser) {
         this.sqlParser = sqlParser;
-        createStatement = new DDLStatement();
+        createStatement = new createStatement();
+        createStatement.setControlType(controlType.CREATE);
     }
     
     @Override

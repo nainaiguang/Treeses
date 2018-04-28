@@ -6,8 +6,6 @@ import lombok.NoArgsConstructor;
 
 /**
  * 事件总线.
- * 
- * @author zhangliang
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EventBusInstance {

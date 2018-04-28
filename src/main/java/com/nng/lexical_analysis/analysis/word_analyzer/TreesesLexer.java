@@ -4,7 +4,7 @@ import com.nng.lexical_analysis.analysis.word_analyzer.analyzer.Dictionary;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.TreeseKeyword;
 
 /**
- * MySQL词法解析器.模仿MYSQL
+ * 词法解析器.模仿MYSQL
  */
 public final class TreesesLexer extends Lexer {
 

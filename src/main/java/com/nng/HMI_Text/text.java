@@ -1,12 +1,15 @@
 package com.nng.HMI_Text;
 
+import com.nng.DBS.SQLEngine;
 import com.nng.DBS.document_control.dml.delete.deleteControl;
 import com.nng.DBS.document_control.dml.insert.InsertControl;
+import com.nng.DBS.document_control.dml.update.updateControl;
 import com.nng.DBS.document_control.dql.select.selectControl;
 import com.nng.lexical_analysis.analysis.SQLparsingEngine;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.SQLStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.DMLStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dql.select.SelectStatement;
+import com.nng.lexical_analysis.contact.controlType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,7 +36,8 @@ public class text {
                 String sql=textArea1.getText();
 
                 System.out.println(sql);
-               // textArea1.setText("");
+                try {
+                    // textArea1.setText("");
                 SQLparsingEngine a=new SQLparsingEngine(sql);
                SQLStatement b= a.parse();
                 textArea2.setText("");
@@ -41,9 +45,9 @@ public class text {
 
 
               // textArea1.append( b.getTables().getSingleTableName());
-                try {
+
                     //selectControl selectControl =new selectControl((SelectStatement) b);
-                    deleteControl deleteControl=new deleteControl((DMLStatement) b);
+                    SQLEngine.getInstance().runSQLEngine(sql);
                 } catch (Exception e1) {
                     e1.printStackTrace();
 

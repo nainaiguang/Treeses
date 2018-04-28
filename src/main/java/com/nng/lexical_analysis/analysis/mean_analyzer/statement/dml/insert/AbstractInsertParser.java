@@ -16,6 +16,7 @@ import com.nng.lexical_analysis.analysis.word_analyzer.token.Assist;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.TokenType;
+import com.nng.lexical_analysis.contact.controlType;
 import com.nng.unit.SQLUtil;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,6 +39,7 @@ public abstract class AbstractInsertParser implements SQLStatementParser {
     public AbstractInsertParser(final SQLParser sqlParser) {
         this.sqlParser = sqlParser;
         insertStatement = new InsertStatement();
+        insertStatement.setControlType(controlType.INSERT);
     }
 
     // https://dev.mysql.com/doc/refman/5.7/en/insert.html

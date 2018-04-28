@@ -3,6 +3,7 @@ package com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.insert;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.GeneratedKey;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Column;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.DMLStatement;
+import com.nng.lexical_analysis.contact.controlType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,6 +15,7 @@ import java.util.LinkedList;
 @Setter
 @ToString
 public class InsertStatement extends DMLStatement{
+    com.nng.lexical_analysis.contact.controlType controlType= com.nng.lexical_analysis.contact.controlType.INSERT;
 
     private final Collection<Column> columns = new LinkedList<>();
     /**

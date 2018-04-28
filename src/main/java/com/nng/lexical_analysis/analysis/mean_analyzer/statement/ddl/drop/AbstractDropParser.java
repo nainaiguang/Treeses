@@ -6,6 +6,7 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.statement.SQLStatementPar
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.ddl.DDLStatement;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Keyword;
+import com.nng.lexical_analysis.contact.controlType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,12 @@ public abstract class AbstractDropParser implements SQLStatementParser {
     
     private final SQLParser sqlParser;
     
-    private final DDLStatement dropStatement;
+    private final dropStatement dropStatement;
     
     public AbstractDropParser(final SQLParser sqlParser) {
         this.sqlParser = sqlParser;
-        dropStatement = new DDLStatement();
+        dropStatement = new dropStatement();
+        dropStatement.setControlType(controlType.DROP);
     }
     
     @Override

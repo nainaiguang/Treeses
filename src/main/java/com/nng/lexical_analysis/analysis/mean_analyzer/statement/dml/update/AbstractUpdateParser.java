@@ -2,11 +2,13 @@ package com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.update;
 
 
 import com.nng.lexical_analysis.analysis.mean_analyzer.SQLParser;
+import com.nng.lexical_analysis.analysis.mean_analyzer.expression.Expression;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.SQLStatementParser;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.DMLStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.token.TableToken;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
+import com.nng.lexical_analysis.contact.controlType;
 import com.nng.unit.SQLUtil;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,7 +21,7 @@ public abstract class AbstractUpdateParser implements SQLStatementParser {
     
     private final SQLParser sqlParser;
     
-    private final DMLStatement updateStatement;
+    private final updateStatement updateStatement;
 
     /**
      *
@@ -29,7 +31,8 @@ public abstract class AbstractUpdateParser implements SQLStatementParser {
     
     public AbstractUpdateParser(final SQLParser sqlParser) {
         this.sqlParser = sqlParser;
-        updateStatement = new DMLStatement();
+        updateStatement = new updateStatement();
+        updateStatement.setControlType(controlType.UPDATE);
     }
 
 //https://dev.mysql.com/doc/refman/5.7/en/update.html
@@ -105,7 +108,7 @@ public abstract class AbstractUpdateParser implements SQLStatementParser {
      * 解析单个 SET 值
      */
     private void parseSetValue() {
-        sqlParser.parseExpression(updateStatement);
+       sqlParser.parseExpression(updateStatement);
         parametersIndex = sqlParser.getParametersIndex();
     }
 }

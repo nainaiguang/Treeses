@@ -13,7 +13,6 @@ import java.util.Set;
 
 /**
  * TreesesSQL Insert语句解析器.
-
  */
 public final class TreesesInsertParser extends AbstractInsertParser {
     

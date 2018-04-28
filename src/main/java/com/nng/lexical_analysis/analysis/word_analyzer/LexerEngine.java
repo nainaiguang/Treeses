@@ -31,8 +31,6 @@ import java.util.Set;
 
 /**
  * Lexical analysis engine.
- *
- * @author zhangliang
  */
 @RequiredArgsConstructor
 public final class LexerEngine {

@@ -26,8 +26,6 @@ import java.util.List;
 
 /**
  * Multiple insert values token.
- *
- * @author zhangliang
  */
 @RequiredArgsConstructor
 @Getter

@@ -4,6 +4,7 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.SQLParser;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.SQLStatementParser;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.DMLStatement;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
+import com.nng.lexical_analysis.contact.controlType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +18,12 @@ public abstract class AbstractDeleteParser implements SQLStatementParser {
     
     private final SQLParser sqlParser;
     
-    private final DMLStatement deleteStatement;
+    private final deleteStatement deleteStatement;
     
     public AbstractDeleteParser(final SQLParser sqlParser) {
         this.sqlParser = sqlParser;
-        deleteStatement = new DMLStatement();
+        deleteStatement = new deleteStatement();
+        deleteStatement.setControlType(controlType.DELETE);
     }
 
 // Single-Table Syntax ：
