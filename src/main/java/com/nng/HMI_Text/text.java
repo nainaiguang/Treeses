@@ -1,5 +1,6 @@
 package com.nng.HMI_Text;
 
+import com.nng.DBS.document_control.dml.delete.deleteControl;
 import com.nng.DBS.document_control.dml.insert.InsertControl;
 import com.nng.DBS.document_control.dql.select.selectControl;
 import com.nng.lexical_analysis.analysis.SQLparsingEngine;
@@ -41,7 +42,8 @@ public class text {
 
               // textArea1.append( b.getTables().getSingleTableName());
                 try {
-                    selectControl selectControl =new selectControl((SelectStatement) b);
+                    //selectControl selectControl =new selectControl((SelectStatement) b);
+                    deleteControl deleteControl=new deleteControl((DMLStatement) b);
                 } catch (Exception e1) {
                     e1.printStackTrace();
 

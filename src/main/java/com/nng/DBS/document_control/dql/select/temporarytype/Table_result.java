@@ -18,11 +18,11 @@ import java.util.List;
 public class Table_result extends Tabletype{
 
     //每一列的内容，即最后输出的结果的列项是什么，若如果是聚合选择项，等的一些函数的调用，明天考虑
-    List<SelectItem> items;
-    List<String> items_attribute;
-
+    private List<SelectItem> items;
+    private List<String> items_attribute;
+    
     //最终的输出结果，全部转化为
-    List<columnsType> column_content=new ArrayList<>();
+    private List<columnsType> column_content=new ArrayList<>();
 
     public Table_result(String tablename)
     {

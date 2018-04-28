@@ -368,32 +368,52 @@ public class crossjoinTable {
         }
         else if(type.equals("CLASS JAVA.LANG.STRING"))//如果用户类型为这些类型
         {
-            if(symbol!=Symbol.EQ)//varchar,char只能是等于
+            if(!((symbol==Symbol.EQ)||(symbol==Symbol.BANG_EQ)))//varchar,char只能是等于
             {
                 throw new documentException(Symbol.EQ,symbol);
             }
-            for(int i=0;i<this.columnsContent.size();i++) {
-                columnsType temp=columnsContent.get(i);
-                if(!(temp.getItem().get(columnplace)+"").equals(A.toString()))
-                {
-                    move.add(i);
+            if(symbol==Symbol.EQ) {
+                for (int i = 0; i < this.columnsContent.size(); i++) {
+                    columnsType temp = columnsContent.get(i);
+                    if (!(temp.getItem().get(columnplace) + "").equals(A.toString())) {
+                        move.add(i);
+                    }
+                }
+            }
+            else if(symbol==Symbol.BANG_EQ){
+                for (int i = 0; i < this.columnsContent.size(); i++) {
+                    columnsType temp = columnsContent.get(i);
+                    if ((temp.getItem().get(columnplace) + "").equals(A.toString())) {
+                        move.add(i);
+                    }
                 }
             }
         }
         else if(type.equals("CLASS JAVA.LANG.CHARACTER"))//如果用户类型为这些类型
         {
-            if(symbol!=Symbol.EQ)//varchar,char只能是等于
+            if(!((symbol==Symbol.EQ)||(symbol==Symbol.BANG_EQ)))//varchar,char只能是等于
             {
                 throw new documentException(Symbol.EQ,symbol);
             }
-            for(int i=0;i<this.columnsContent.size();i++) {
-                columnsType temp=columnsContent.get(i);
-                if(!((String)temp.getItem().get(columnplace)).equals((A.toString().charAt(0))+""))
-                {
-                    move.add(i);
+            if(symbol==Symbol.EQ) {
+                for (int i = 0; i < this.columnsContent.size(); i++) {
+                    columnsType temp = columnsContent.get(i);
+                    if (!((String) temp.getItem().get(columnplace)).equals((A.toString().charAt(0)) + "")) {
+                        move.add(i);
+                    }
                 }
             }
-        }
+            else if(symbol==Symbol.BANG_EQ) {
+                for (int i = 0; i < this.columnsContent.size(); i++) {
+                    columnsType temp = columnsContent.get(i);
+                    if (((String) temp.getItem().get(columnplace)).equals((A.toString().charAt(0)) + "")) {
+                        move.add(i);
+                    }
+                }
+            }
+            }
+
+
             /**
              * 逆向移除不符合的行
              */
