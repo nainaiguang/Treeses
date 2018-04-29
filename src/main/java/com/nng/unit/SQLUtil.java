@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
  * SQL工具类.
  */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class SQLUtil {
+public class SQLUtil implements Util{
 
     /**
      * 去掉SQL表达式的特殊字符.

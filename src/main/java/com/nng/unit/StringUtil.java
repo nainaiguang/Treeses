@@ -24,7 +24,7 @@ import lombok.AllArgsConstructor;
  * 字符串工具类.
  */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public final class StringUtil {
+public final class StringUtil implements Util{
     
     /**
      * 判断是否为boolean值.

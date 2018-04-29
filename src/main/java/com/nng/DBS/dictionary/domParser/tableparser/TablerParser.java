@@ -235,7 +235,7 @@ public class TablerParser extends Domparser{
         {
             Element column=getDocument().createElement("column");
             column.setAttribute("name",table.getColumn().get(i));
-            column.setAttribute("type",table.getAttribute().get(i));
+            column.setAttribute("type",table.getAttribute().get(i).toUpperCase());
             columns.appendChild(column);
         }
 
@@ -277,7 +277,7 @@ public class TablerParser extends Domparser{
         {
             Element column=getDocument().createElement("column");
             column.setAttribute("name",columns.get(i));
-            column.setAttribute("type",types.get(i));
+            column.setAttribute("type",types.get(i).toUpperCase());
             columnss.appendChild(column);
         }
 

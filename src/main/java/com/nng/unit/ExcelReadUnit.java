@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-public class ExcelReadUnit {
+public class ExcelReadUnit implements Util{
     private DataFormatter dataFormatter=new DataFormatter();//用于格式化单元格数据
 
     /*

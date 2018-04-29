@@ -10,6 +10,7 @@ import com.nng.lexical_analysis.analysis.SQLparsingEngine;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.SQLStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.ddl.DDLStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.DMLStatement;
+import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.update.updateStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dql.select.SelectStatement;
 import com.nng.lexical_analysis.contact.controlType;
 
@@ -47,7 +48,7 @@ public class SQLEngine {
             } else if (b.getControlType() == controlType.INSERT) {
                 InsertControl.getInstance().insert_table((DMLStatement) b);
             } else if (b.getControlType() == controlType.UPDATE) {
-                new updateControl((DMLStatement) b);
+                new updateControl((updateStatement) b);
             } else if (b.getControlType() == controlType.SELECT) {
                 new selectControl((SelectStatement) b);
             }

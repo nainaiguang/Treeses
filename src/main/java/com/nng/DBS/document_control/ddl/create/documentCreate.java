@@ -33,7 +33,6 @@ public class documentCreate {
              if (!myFilePath.exists())
                  {
                      myFilePath.createNewFile();
-                     myFilePath.setReadOnly();//设置只读
                  }
              }
 

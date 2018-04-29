@@ -11,7 +11,7 @@ import java.math.BigInteger;
  * 数字工具类.
  */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public final class NumberUtil {
+public final class NumberUtil implements Util{
     
     /**
      * 将数字类型对象四舍五入并转换为整形.

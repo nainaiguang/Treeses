@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 聚合函数类
  */
-public class Aggregate {
+public class Aggregate implements Util{
 
     public static double SUM(List<Object> values) throws Exception {
         if(values.size()<=0)

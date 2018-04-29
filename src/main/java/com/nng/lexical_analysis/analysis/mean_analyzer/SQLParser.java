@@ -12,6 +12,7 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.Selec
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Table;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Tables;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.SQLStatement;
+import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.update.updateStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dql.select.SelectStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.token.OffsetToken;
 import com.nng.lexical_analysis.analysis.mean_analyzer.token.RowCountToken;
@@ -54,6 +55,11 @@ public class SQLParser extends AbstractParser {
 //        System.out.println("begin：" + getLexer().getCurrentToken().getLiterals());
 
         int beginPosition = getLexer().getCurrentToken().getEndPosition();
+        if(sqlStatement.getClass().getSimpleName().equals("updateStatement"))
+        {
+            String SS=getLexer().getCurrentToken().getLiterals();
+            ((updateStatement)sqlStatement).getSetcontent().add(getLexer().getCurrentToken().getLiterals());
+        }
         Expression result = parseExpression();
         if (result instanceof PropertyExpression) {
             setTableToken(sqlStatement, beginPosition, (PropertyExpression) result);

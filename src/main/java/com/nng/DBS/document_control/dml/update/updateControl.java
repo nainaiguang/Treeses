@@ -2,14 +2,17 @@ package com.nng.DBS.document_control.dml.update;
 
 import com.google.common.base.Optional;
 import com.nng.DBS.dictionary.domParser.tableparser.TablerParser;
+import com.nng.DBS.document_control.dml.delete.doucumentDelete;
 import com.nng.DBS.document_control.dql.select.temporarytype.Table_contact;
 import com.nng.DBS.document_control.dql.select.temporarytype.columnsType;
 import com.nng.DBS.document_control.dql.select.temporarytype.crossjoinTable;
 import com.nng.exception.SQLDictionaryException;
 import com.nng.exception.TreesesException;
+import com.nng.exception.documentException;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.*;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Table;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.DMLStatement;
+import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.update.updateStatement;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
 import com.nng.lexical_analysis.contact.ShardingOperator;
@@ -48,9 +51,17 @@ public class updateControl {
     /**
      * 声明
      */
-    private DMLStatement dmlStatement;
+    private updateStatement dmlStatement;
 
-    public updateControl(DMLStatement dmlStatement) throws Exception {
+    List<String> setColumns;//要变换的列
+
+    List<String> setcontents;//要根据类型自己判断是否可以转换，要变换的值
+    List<Integer> rs=new ArrayList<>();//需要改变的列的行数
+    /**
+     * @param dmlStatement
+     * @throws Exception
+     */
+    public updateControl(updateStatement dmlStatement) throws Exception {
 
         //System.out.println(dmlStatement);
 
@@ -63,6 +74,16 @@ public class updateControl {
         {
             this.tables_name.add(table);
         }
+        if(tables_name.size()>1)
+        {
+            throw new Exception("SQL error,UPDATE only accept one table in time");
+        }
+        else if(tables_name.size()<1)
+        {
+            throw new Exception("SQL error,UPDATE need one table in time");
+        }
+        this.setColumns=dmlStatement.getSetColumn();
+        this.setcontents=dmlStatement.getSetcontent();
         //添加普通条件
         this.conditions=dmlStatement.getConditions();
         //添加列相等查询条件
@@ -70,6 +91,9 @@ public class updateControl {
         this.dmlStatement=dmlStatement;
         judge();
         deal_from();
+        deal_where();
+        deal_set();
+        documentUpdate dd=new documentUpdate(tables_name.get(0),crossjoinTables.getColumnsContent());
     }
 
 
@@ -85,6 +109,12 @@ public class updateControl {
         for(int i=0;i<table_contacts.size();i++) {
             crossjoinTables.addTable(this.table_contacts.get(i));
         }
+
+        for(int i=0;i<crossjoinTables.getColumnsContent().size();i++)
+        {
+            this.rs.add(i);
+        }
+        System.out.println(rs+";;;;;;");
     }
 
     /**
@@ -130,11 +160,13 @@ public class updateControl {
      */
     private void deal_equalORNotequal()throws Exception
     {
+
         Iterator iter = conditions.getConditions().entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry entry = (Map.Entry) iter.next();
             Column key = (Column) entry.getKey();
             Condition val = (Condition) entry.getValue();
+
             if(val.getSymbol()!= Symbol.TILDE) {
                 if(val.getSymbol()==Symbol.EQ)
                 {
@@ -160,7 +192,9 @@ public class updateControl {
                 {
                     val.setSymbol(Symbol.LT_EQ);
                 }
-                this.crossjoinTables.ColumnEQorNotEQValues(key.getTableName(), key.getName(), val);
+                List<Integer> temp=this.crossjoinTables.updatechangeContent(key.getTableName(), key.getName(), val);//不符合的项
+                System.out.println(temp);
+                    rs=getRepetition(rs,temp);
             }
             else{//是in或between
                 if(val.getOperator().equals(ShardingOperator.IN))
@@ -172,11 +206,35 @@ public class updateControl {
                     throw new Exception("SQL Not support,UPDATE  are not support the BETWEEN now");
                 }
             }
+
+            System.out.println(rs+";;;;;;");
+
+
+
         }
     }
 
     //每一行
-
+   private List<Integer> getRepetition(List<Integer> A,List<Integer> B)
+   {
+       List<Integer> results=new ArrayList<>();
+       for(int a:A)
+       {
+           boolean check=false;
+           for(int b:B)
+           {
+               if(a==b)
+               {
+                   check=true;
+               }
+           }
+           if(check)
+           {
+               results.add(a);
+           }
+       }
+       return results;
+   }
 
     /**
      * 读取每一个表内容放进table_contacts中
@@ -250,6 +308,90 @@ public class updateControl {
             this.table_contacts.add(temp_one);
         }
     }
+
+
+    public void deal_set() throws Exception {
+        for(int i=0;i<this.setColumns.size();i++)//获取要设置的值的列
+        {
+            String column=setColumns.get(i);
+            int lieplace=crossjoinTables.getColumnPlace(tables_name.get(0),column);//列的位置
+            String type=TablerParser.getInstance().get_column_type(tables_name.get(0),column);
+            if(type.equals(DefaultKeyword.FLOAT.toString())||type.equals(DefaultKeyword.DOUBLE.toString()))
+            {
+                Double ro=null;
+                if(IsDouble(this.setcontents.get(i)))
+                {
+                   ro =Double.parseDouble(this.setcontents.get(i));
+                }
+                else
+                {
+                    throw new documentException(DefaultKeyword.DOUBLE.toString(),this.setcontents.get(i).getClass().getSimpleName(),1);
+                }
+                for(int j=0;j<rs.size();j++)//改变位置的行
+                {
+
+                    crossjoinTables.getColumnsContent().get(rs.get(j)).getItem().set(lieplace,ro);
+                }
+
+            }
+            else if(type.equals((DefaultKeyword.INT.toString())))
+            {
+                int ro=0;
+                if(IsInt(this.setcontents.get(i)))
+                {
+                    ro=Integer.parseInt(this.setcontents.get(i));
+                }
+                else
+                {
+                    throw new documentException(DefaultKeyword.INT.toString(),this.setcontents.get(i).getClass().getSimpleName(),1);
+                }
+                for(int j=0;j<rs.size();j++)//改变位置的行
+                {
+                    System.out.println(ro+"nihaos");
+                    crossjoinTables.getColumnsContent().get(rs.get(j)).getItem().set(lieplace,ro);
+                    for(int z=0;z<crossjoinTables.getColumnsContent().size();z++)
+                    {
+                        System.out.println(crossjoinTables.getColumnsContent().get(z).getItem());
+                    }
+
+                }
+            }
+            else if(type.equals(DefaultKeyword.VARCHAR.toString()))
+            {
+                for(int j=0;j<rs.size();j++)//改变位置的行
+                {
+                    crossjoinTables.getColumnsContent().get(j).getItem().set(lieplace,this.setcontents.get(i));
+                }
+            }
+            else if(type.equals(DefaultKeyword.CHAR.toString()))
+            {
+                if(setcontents.get(i).length()>1)
+                {
+                    throw new documentException(DefaultKeyword.CHAR.toString(),this.setcontents.get(i).getClass().getSimpleName(),1);
+                }
+                for(int j=0;j<rs.size();j++)//改变位置的行
+                {
+                    crossjoinTables.getColumnsContent().get(rs.get(j)).getItem().set(lieplace,this.setcontents.get(i));
+                }
+            }
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /**

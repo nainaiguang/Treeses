@@ -358,4 +358,26 @@ public class deleteControl {
             }
         }
     }
+
+    //获取重复项
+    private List<Integer> getRepetition(List<Integer> A,List<Integer> B)
+    {
+        List<Integer> results=new ArrayList<>();
+        for(int a:A)
+        {
+            boolean check=false;
+            for(int b:B)
+            {
+                if(a==b)
+                {
+                    check=true;
+                }
+            }
+            if(check)
+            {
+                results.add(a);
+            }
+        }
+        return results;
+    }
 }

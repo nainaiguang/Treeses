@@ -654,7 +654,7 @@ public class crossjoinTable {
      * @param columnname
      * @return
      */
-    private  int getColumnPlace(String tablename,String columnname)
+    public   int getColumnPlace(String tablename,String columnname)
     {
         int result=-1;
         for(int i=0;i<table_structures.size();i++)
@@ -1807,7 +1807,7 @@ public class crossjoinTable {
 
 
     // private List<columnsType> columnsContent=new ArrayList<>();
-    private void updatechangeContent(String tablename,String columnname, Condition condition) throws Exception {
+    public List<Integer> updatechangeContent(String tablename,String columnname, Condition condition) throws Exception {
         //string 写的类型
         String dicTypes= TablerParser.getInstance().get_column_type(tablename,columnname);
 
@@ -2048,13 +2048,7 @@ public class crossjoinTable {
         }
 
 
-        /**
-         * 逆向移除不符合的行
-         */
-        for(int i=move.size()-1;i>=0;i--)
-        {
-            columnsContent.remove(columnsContent.get(move.get(i)));
-        }
+       return move;
 
     }
 }

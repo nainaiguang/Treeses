@@ -7,7 +7,7 @@ import java.io.FileReader;
 /**
  * 统计指定目录下java文件的行数
  */
-public class CountFileRow {
+public class CountFileRow implements Util{
     private static int total = 0;
     private static int fileNum = 0;
     /*

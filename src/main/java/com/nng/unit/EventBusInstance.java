@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
  * 事件总线.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class EventBusInstance {
+public final class EventBusInstance implements Util{
     
     private static final EventBus INSTANCE = new EventBus();
     

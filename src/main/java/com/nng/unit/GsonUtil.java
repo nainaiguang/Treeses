@@ -20,7 +20,7 @@ import java.util.Map;
  *
  */
 
-public class GsonUtil {
+public class GsonUtil implements Util{
 
 
     private static Gson gson = null;

@@ -95,12 +95,19 @@ public abstract class AbstractUpdateParser implements SQLStatementParser {
         }
         int beginPosition = sqlParser.getLexer().getCurrentToken().getEndPosition();
         String literals = sqlParser.getLexer().getCurrentToken().getLiterals();
+
         sqlParser.getLexer().nextToken();
         if (sqlParser.skipIfEqual(Symbol.DOT)) {
             if (updateStatement.getTables().getSingleTableName().equalsIgnoreCase(SQLUtil.getExactlyValue(literals))) {
                 updateStatement.getSqlTokens().add(new TableToken(beginPosition - literals.length(), literals));
             }
+            String literalss = sqlParser.getLexer().getCurrentToken().getLiterals();
+            updateStatement.getSetColumn().add(literalss);
             sqlParser.getLexer().nextToken();
+        }
+        else
+        {
+            updateStatement.getSetColumn().add(literals);
         }
     }
 

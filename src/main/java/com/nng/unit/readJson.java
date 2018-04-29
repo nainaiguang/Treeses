@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * 把Json格式转化成List<String>
  */
-public final class readJson {
+public final class readJson implements Util{
 
     /**
      * 把["","",...]一个个取出来,记得最后转化成自己想要的格式
