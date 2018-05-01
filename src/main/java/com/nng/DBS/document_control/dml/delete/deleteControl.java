@@ -15,6 +15,7 @@ import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
 import com.nng.lexical_analysis.contact.ShardingOperator;
 import com.nng.unit.readJson;
+import lombok.Getter;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,6 +25,8 @@ import java.util.*;
 
 public class deleteControl {
    // DELETE FROM table_name [WHERE Clause]
+    @Getter
+    private String res=null;
     /**
      * from的表内容
      */
@@ -71,6 +74,7 @@ public class deleteControl {
         deal_from();
         deal_where();
         doucumentDelete dd=new doucumentDelete(tables_name.get(0),crossjoinTables.getColumnsContent());
+        res="delete success";
     }
 
 

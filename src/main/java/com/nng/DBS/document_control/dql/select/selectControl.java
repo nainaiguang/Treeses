@@ -19,9 +19,11 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.relation.table.Table;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dql.select.SelectStatement;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
+import com.nng.lexical_analysis.contact.OrderType;
 import com.nng.lexical_analysis.contact.ShardingOperator;
 import com.nng.unit.readJson;
 import com.nng.unit.removeDuplicate;
+import lombok.Getter;
 
 import java.io.*;
 import java.util.*;
@@ -67,6 +69,8 @@ import java.util.*;
 
 //select 的 item 有两种，一种是普通，一种是聚合函数，需要注意
 public class selectControl {
+    @Getter
+    String res="";
     /**
      * 解析之后的结果
      */
@@ -158,6 +162,9 @@ public class selectControl {
 
         deal_selectitem();
 
+        deal_orderby();
+
+        tidyResult(crossjoinTables);
     for(columnsType oo:crossjoinTables.getColumnsContent())
     {
         for(Object pp:oo.getItem())
@@ -177,95 +184,37 @@ public class selectControl {
         System.out.println();
     }
 
-//        Iterator iter = conditions.getConditions().entrySet().iterator();
-//        while (iter.hasNext()) {
-//            System.out.println("你好la");
-//            Map.Entry entry = (Map.Entry) iter.next();
-//            Column key = (Column) entry.getKey();
-//            Condition val = (Condition) entry.getValue();
-//            List<String> a=new LinkedList<>();
-//            a.add("p");
-//            ShardingValue uu=val.getShardingValue(Collections.singletonList(a));
-//            Comparable<String> aa= (Comparable<String>) uu.getValue();
-//            String B= (String) aa;
-//            System.out.println(B+"你好吗");
-//        }
+    }
+    private void tidyResult(crossjoinTable crossjoinTables)
+    {
+        String result="";
+        List<String> kongge=new ArrayList<>();
 
-
-
-//        for(int i=0;i<table_contacts.size();i++)
-//        {
-//            for(int j=0;j<table_contacts.get(i).getColumns_content().size();j++)
-//            {
-//                for(int z=0;z<table_contacts.get(i).getColumns_content().get(j).getItem().size();z++)
-//                {
-//                    System.out.print(table_contacts.get(i).getColumns_content().get(j).getItem().get(z));
-//                }
-//                System.out.println();
-//            }
-//        }
-
-
-
+        if(crossjoinTables.getResultTable_structures().size()>0) {
+            for(selectItemResult sl:crossjoinTables.getResultTable_structures())
+            {
+                result=result+sl.getItemname()+"\t";
+                String tempkongge="";
+                for(int i=1;i<sl.getItemname().length();i++)
+                {
+                    tempkongge=tempkongge+" ";
+                }
+                kongge.add(tempkongge);
+            }
+            result=result+"\n";
+            for (int i = 0; i < crossjoinTables.getResultTable_structures().get(0).getColumn_content().size();i++)
+            {
+                for(int j=0;j<crossjoinTables.getResultTable_structures().size();j++)
+                {
+                    selectItemResult sl=crossjoinTables.getResultTable_structures().get(j);
+                    result=result+sl.getColumn_content().get(i)+kongge.get(j)+"\t";
+                }
+                result=result+"\n";
+            }
+        }
+        res=result;
     }
 
-
-
-    /**
-     *
-     * @throws Exception
-     */
-    private void add_table_contact() throws Exception {
-//        Collection<String> tablesname=selectStatement.getTables().getTableNames();
-//        for(String str : tablesname)
-//        {
-//            Table_result temp_table=new Table_result();
-//            temp_table.setTable_name(TablerParser.getInstance().get_tablename(str));//判定表是否存在
-//            temp_table.setAlias(selectStatement.getTables().find(str).orNull().getAlias().orNull());
-//            //temp_table.setColumn(TablerParser.getInstance().);
-//        }
-//        for(SelectItem selectItem:selectStatement.getItems())
-//        {
-//            System.out.println(selectItem.getExpression());
-//        }
-//        for(String table:selectStatement.getTables().getTableNames())
-//        {
-//            System.out.println(table);
-//        }
-
-//        for(Table_contact pp:table_contacts)
-//        {
-//            for(columnsType ll:pp.getColumns_content())
-//            {
-//                for(Object mm:ll.getItem())
-//                {
-//                    System.out.print(mm+",");
-//                }
-//                System.out.println();
-//            }
-//        }
-
-
-        /**
-         * 取出 in 的值 ，但是不能为 列。只能是 in (5,6,7) 之类的
-         */
-//        Iterator iter = conditions.getConditions().entrySet().iterator();
-//        while (iter.hasNext()) {
-//            Map.Entry entry = (Map.Entry) iter.next();
-//            Column key = (Column) entry.getKey();
-//            Condition val = (Condition) entry.getValue();
-//            List<String> a=new LinkedList<>();
-                //这个list不重要，反正都能取的到，把要取得列名放进去就行
-//            a.add("i");
-//            ShardingValue uu=val.getShardingValue(Collections.singletonList(a));
-//            List<Integer> aa= (List<Integer>) uu.getValues();
-//            for(int b:aa)
-//            {
-//                System.out.println(b);
-//            }
-//
-//        }
-    }
 
     /**
      * 读取select中的所有表的内容，留着排除用,处理from
@@ -444,6 +393,28 @@ public class selectControl {
             throw new Exception("sorry,group by only support 1 item now");
         }
         this.crossjoinTables.GroupBy(selectStatement.getTables(),groupByItems.get(0));
+    }
+    private void deal_orderby() throws Exception
+    {
+        if(orderByItems.isEmpty())
+        {
+            return;
+        }
+        if(orderByItems.size()>1)
+        {
+            throw new Exception("sorry,order by only support 1 item now");
+        }
+
+        Boolean paixu=false;
+        if(orderByItems.get(0).getType()== OrderType.DESC)
+        {
+            paixu=false;
+        }
+        else if(orderByItems.get(0).getType()== OrderType.ASC)
+        {
+            paixu=true;
+        }
+        this.crossjoinTables.deal_orderby(selectStatement.getTables(),orderByItems.get(0),paixu);
     }
 
     private void deal_selectitem()throws Exception

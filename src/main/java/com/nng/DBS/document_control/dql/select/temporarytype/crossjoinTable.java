@@ -17,6 +17,8 @@ import com.nng.lexical_analysis.api.ShardingValue;
 import com.nng.lexical_analysis.contact.AggregationType;
 import com.nng.lexical_analysis.contact.ShardingOperator;
 import com.nng.unit.Aggregate;
+import com.nng.unit.sort.util.SortUtil;
+import com.nng.unit.sort.util.factory.SortUtilFactory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.poi.ss.formula.functions.T;
@@ -36,8 +38,7 @@ public class crossjoinTable {
 
     //结果表的每一个
     private List<selectItemResult> resultTable_structures=new ArrayList<>();
-    //结果每一行
-    private List<columnsType> resultColumnsContent=new ArrayList<>();
+
 
     private GroupbyResult groupbyResults;
 
@@ -891,7 +892,6 @@ public class crossjoinTable {
             throw new SQLDictionaryException(tablename);
         }
 
-        System.out.println(tablename);
 
         int columnplace=getColumnPlace(tablename,columnname);
 
@@ -924,8 +924,6 @@ public class crossjoinTable {
      */
     //结果表的每一个
     //resultTable_structures
-    //结果每一行
-    //resultColumnsContent
     public void Selectitem(List<SelectItem> items,boolean star,Tables tables) throws Exception
     {
         /**
@@ -957,10 +955,6 @@ public class crossjoinTable {
                 Aggregat=true;
             }
         }
-
-
-
-
 
         if(Groupby==false&&Aggregat==false)//无group by，无聚合
         {
@@ -1023,9 +1017,6 @@ public class crossjoinTable {
 
         }
 
-
-
-
         else if(Groupby==true&&Aggregat==false)//有group by，无聚合
         {
             List<Map<String, String>> resultColumnName = getTableandColumnFromselectItem(items, tables);//输出的item
@@ -1060,10 +1051,6 @@ public class crossjoinTable {
             }
 
         }
-
-
-
-
 
         else if(Groupby==false&&Aggregat==true)//无group by，有聚合
         {
@@ -1138,10 +1125,6 @@ public class crossjoinTable {
             }
 
         }
-
-
-
-
 
         else if(Groupby==true&&Aggregat==true)//有group by，有聚合
         {
@@ -1233,11 +1216,6 @@ public class crossjoinTable {
 
     }
 
-    /**
-     * 根据位置获取第几列
-     * @return
-     */
-    private List<columnsType> getresultColumnsContent(List<Integer> places){return  null;}
 
     /**
      * 配套表名和列名
@@ -1733,19 +1711,178 @@ public class crossjoinTable {
     }
 
 
+    /**
+     * 处理order by
+     * 只允许一处
+     * 如果没有表名  判断from的表
+     * 1.列没有重复，
+     * 2.列存在
+     * 3.表是否存在
+     * 4.别名是否存在在表中
+     * @throws Exception
+     */
+    public void deal_orderby(Tables tables,OrderItem orderItem,boolean perface)throws Exception
+    {
+        String tablename=orderItem.getOwner().orNull();
+        String columnname=orderItem.getName().orNull();
+        Table lingshi=tables.find(tablename).orNull();//通过表名或者别名找出表 4.
+        if(lingshi!=null)
+        {
+            tablename=lingshi.getName();
+        }
+        List<String> tablenames=new ArrayList<>();//所有表的名称
+        //所有查询表的表名称
+        for(String table:tables.getTableNames())
+        {
+            tablenames.add(table);
+        }
+
+        int checkcolumnIntableNumber=0;//判断列在不同表中一共出现了几次
+        //1，2
+        if(tablename==null) {
+            String columnInWhatTable=null;
+            for (String tableN : tablenames) {
+                if (existcolumn(columnname, TablerParser.getInstance().get_column(tableN))) {//列是否存在在某个表内
+                    checkcolumnIntableNumber++;
+                    columnInWhatTable = tableN;
+                }
+            }
+
+            if (checkcolumnIntableNumber == 0) {
+                throw new SQLDictionaryException(columnname);
+            } else if (checkcolumnIntableNumber > 1) {
+                throw new SQLDictionaryException(columnname, 'i');
+            }
+            tablename = columnInWhatTable;
+        }
+        if(tablenames.indexOf(tablename)==-1)//3
+        {
+            throw new SQLDictionaryException(tablename);
+        }
+
+        /**
+         * 正片开始
+         */
+
+        if(Aggregat==false &&Groupby==false) {
+            int columnplace = getColumnPlace(tablename, columnname);
+            if (columnplace == -1)//列不存在
+            {
+                throw new documentException(columnname);
+            }
+
+            String type = TablerParser.getInstance().get_column_type(tablename, columnname);
+            if (type.equals("VARCHAR")) {
+                SortUtil<String> stringSortUtil = (SortUtil<String>) SortUtilFactory.createSortUtil("string");
+                Map<Integer, String> sort = new HashMap<>();
+                for (int i = 0; i < columnsContent.size(); i++)//把要排序的列写成map(i,object)
+                {
+                    sort.put(i, columnsContent.get(i).getItem().get(columnplace).toString());
+                }
+                Map<Integer, String> resultMap = stringSortUtil.rank(sort, perface);
+
+                List<Integer> newplace = new ArrayList<>();
+                for (Map.Entry<Integer, String> entry : resultMap.entrySet()) {
+                    newplace.add(entry.getKey());
+                }
+                //结果表的每一个
+                for (selectItemResult selectItemResults : this.resultTable_structures) {
+                    List<Object> temp = new ArrayList<>();
+                    for (int place : newplace) {
+                        temp.add(selectItemResults.getColumn_content().get(place));
+                    }
+                    selectItemResults.setColumn_content(temp);
+                }
+
+            } else if (type.equals("CHAR")) {
+                SortUtil<Character> stringSortUtil = (SortUtil<Character>) SortUtilFactory.createSortUtil("char");
+                Map<Integer, Character> sort = new HashMap<>();
+                for (int i = 0; i < columnsContent.size(); i++)//把要排序的列写成map(i,object)
+                {
+                    sort.put(i, columnsContent.get(i).getItem().get(columnplace).toString().charAt(0));
+                }
+                Map<Integer, Character> resultMap = stringSortUtil.rank(sort, perface);
+
+                List<Integer> newplace = new ArrayList<>();
+                for (Map.Entry<Integer, Character> entry : resultMap.entrySet()) {
+                    newplace.add(entry.getKey());
+                }
+                //结果表的每一个
+                for (selectItemResult selectItemResults : this.resultTable_structures) {
+                    List<Object> temp = new ArrayList<>();
+                    for (int place : newplace) {
+                        temp.add(selectItemResults.getColumn_content().get(place));
+                    }
+                    selectItemResults.setColumn_content(temp);
+                }
+            } else if (type.equals("INT")) {
+                SortUtil<Integer> stringSortUtil = (SortUtil<Integer>) SortUtilFactory.createSortUtil("int");
+                Map<Integer, Integer> sort = new HashMap<>();
+                for (int i = 0; i < columnsContent.size(); i++)//把要排序的列写成map(i,object)
+                {
+                    sort.put(i, Integer.parseInt(columnsContent.get(i).getItem().get(columnplace).toString()));
+                }
+                Map<Integer, Integer> resultMap = stringSortUtil.rank(sort, perface);
+
+                List<Integer> newplace = new ArrayList<>();
+                for (Map.Entry<Integer, Integer> entry : resultMap.entrySet()) {
+                    newplace.add(entry.getKey());
+                }
+                //结果表的每一个
+                for (selectItemResult selectItemResults : this.resultTable_structures) {
+                    List<Object> temp = new ArrayList<>();
+                    for (int place : newplace) {
+                        temp.add(selectItemResults.getColumn_content().get(place));
+                    }
+                    selectItemResults.setColumn_content(temp);
+                }
+            } else if (type.equals("DOUBLE")) {
+                SortUtil<Double> stringSortUtil = (SortUtil<Double>) SortUtilFactory.createSortUtil("double");
+                Map<Integer, Double> sort = new HashMap<>();
+                for (int i = 0; i < columnsContent.size(); i++)//把要排序的列写成map(i,object)
+                {
+                    sort.put(i, Double.parseDouble(columnsContent.get(i).getItem().get(columnplace).toString()));
+                }
+                Map<Integer, Double> resultMap = stringSortUtil.rank(sort, perface);
+
+                List<Integer> newplace = new ArrayList<>();
+                for (Map.Entry<Integer, Double> entry : resultMap.entrySet()) {
+                    newplace.add(entry.getKey());
+                }
+                //结果表的每一个
+                for (selectItemResult selectItemResults : this.resultTable_structures) {
+                    List<Object> temp = new ArrayList<>();
+                    for (int place : newplace) {
+                        temp.add(selectItemResults.getColumn_content().get(place));
+                    }
+                    selectItemResults.setColumn_content(temp);
+                }
+            } else if (type.equals("FLOAT")) {
+                SortUtil<Float> stringSortUtil = (SortUtil<Float>) SortUtilFactory.createSortUtil("float");
+                Map<Integer, Float> sort = new HashMap<>();
+                for (int i = 0; i <columnsContent.size(); i++)//把要排序的列写成map(i,object)
+                {
+                    sort.put(i, Float.parseFloat(columnsContent.get(i).getItem().get(columnplace).toString()));
+                }
+                Map<Integer, Float> resultMap = stringSortUtil.rank(sort, perface);
+
+                List<Integer> newplace = new ArrayList<>();
+                for (Map.Entry<Integer, Float> entry : resultMap.entrySet()) {
+                    newplace.add(entry.getKey());
+                }
+                //结果表的每一个
+                for (selectItemResult selectItemResults : this.resultTable_structures) {
+                    List<Object> temp = new ArrayList<>();
+                    for (int place : newplace) {
+                        temp.add(selectItemResults.getColumn_content().get(place));
+                    }
+                    selectItemResults.setColumn_content(temp);
+                }
+            }
 
 
-
-
-
-
-
-
-
-
-
-
-
+        }
+    }
 
 
 

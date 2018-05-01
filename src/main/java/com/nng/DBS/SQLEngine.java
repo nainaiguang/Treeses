@@ -13,44 +13,41 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.DMLStatemen
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.update.updateStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dql.select.SelectStatement;
 import com.nng.lexical_analysis.contact.controlType;
+import lombok.Getter;
 
 public class SQLEngine {
-    private static SQLEngine Obj;
-
-    /**
-     * 单例模式
-     * 获取本类实体
-     * @return
-     */
-    public static SQLEngine getInstance()
-    {
-        if(Obj==null)
-        {
-            Obj=new SQLEngine();
-        }
-        return Obj;
-    }
-
+    @Getter
+    String result=null;
     public void runSQLEngine(String sql)throws Exception
     {
-
         SQLparsingEngine a=new SQLparsingEngine(sql);
         SQLStatement b= a.parse();
         System.out.println(b.getControlType());
             if (b.getControlType() == controlType.CREATE) {
-                createControl.getInstance().create_table((DDLStatement) b);
+                createControl createControls=new createControl();
+                createControls.create_table((DDLStatement) b);
+                result=createControls.getResult();
+
             } else if (b.getControlType() == controlType.ALTER) {
             } else if (b.getControlType() == controlType.DROP) {
-                dropControl.getInstance().drop_Table((DDLStatement) b);
+               dropControl dropControls=new dropControl();
+               dropControls.drop_Table((DDLStatement) b);
+               result=dropControls.getResult();
             } else if (b.getControlType() == controlType.TRUNCATE) {
             } else if (b.getControlType() == controlType.DELETE) {
-                new deleteControl((DMLStatement)b);
+               deleteControl deleteControls= new deleteControl((DMLStatement)b);
+               result=deleteControls.getRes();
             } else if (b.getControlType() == controlType.INSERT) {
-                InsertControl.getInstance().insert_table((DMLStatement) b);
+                InsertControl insertControl=new InsertControl();
+                insertControl.insert_table((DMLStatement) b);
+                result=insertControl.getResult();
             } else if (b.getControlType() == controlType.UPDATE) {
-                new updateControl((updateStatement) b);
+               updateControl updateControls= new updateControl((updateStatement) b);
+               result=updateControls.getRes();
             } else if (b.getControlType() == controlType.SELECT) {
-                new selectControl((SelectStatement) b);
+
+               selectControl selectControls= new selectControl((SelectStatement) b);
+               result= selectControls.getRes();
             }
     }
 }

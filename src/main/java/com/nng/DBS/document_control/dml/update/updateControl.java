@@ -17,6 +17,7 @@ import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
 import com.nng.lexical_analysis.contact.ShardingOperator;
 import com.nng.unit.readJson;
+import lombok.Getter;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,6 +28,8 @@ import java.util.*;
 public class updateControl {
     // UPDATE table_name SET field1=new-value1, field2=new-value2
     //        [WHERE Clause]
+    @Getter
+    String res=null;
     /**
      * from的表内容
      */
@@ -94,6 +97,7 @@ public class updateControl {
         deal_where();
         deal_set();
         documentUpdate dd=new documentUpdate(tables_name.get(0),crossjoinTables.getColumnsContent());
+        res="update column to"+tables_name.get(0)+" success";
     }
 
 
