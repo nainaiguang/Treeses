@@ -96,6 +96,10 @@ public enum DefaultKeyword implements Keyword{
     DELETE,
 
     /*
+    Log
+     */
+    LOG,
+    /*
     Select
      */
     SELECT,

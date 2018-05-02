@@ -12,6 +12,7 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.delete.Tree
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.insert.TreesesInsertParser;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.update.TreesesUpdateParser;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dql.select.TreesesSelectParser;
+import com.nng.lexical_analysis.analysis.mean_analyzer.statement.util.log.TreesesLogParser;
 import com.nng.lexical_analysis.analysis.word_analyzer.LexerEngine;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.DefaultKeyword;
 import com.nng.lexical_analysis.analysis.word_analyzer.token.Symbol;
@@ -58,6 +59,10 @@ public class SQLparsingEngine {
         }
         if (sqlParser.equalAny(DefaultKeyword.TRUNCATE)) {
             return new TreesesTruncateParser(sqlParser).parse();
+        }
+        if(sqlParser.equalAny(DefaultKeyword.LOG))
+        {
+            return new TreesesLogParser().parse();
         }
         throw new SQLParsingUnsupportedException(sqlParser.getLexer().getCurrentToken().getType());
     }

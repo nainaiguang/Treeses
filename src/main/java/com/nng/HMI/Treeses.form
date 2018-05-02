@@ -2,14 +2,14 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.nng.HMI.Treeses">
   <grid id="27dc6" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
     <constraints>
-      <xy x="20" y="20" width="558" height="1253"/>
+      <xy x="20" y="24" width="807" height="1249"/>
     </constraints>
     <properties/>
     <border type="none">
       <title-color color="-4473925"/>
     </border>
     <children>
-      <grid id="250f8" binding="jframe" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="250f8" binding="jframe" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="20" left="0" bottom="0" right="0"/>
         <constraints/>
         <properties/>
@@ -23,7 +23,7 @@
           <scrollpane id="c9f8">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                <preferred-size width="500" height="300"/>
+                <preferred-size width="800" height="400"/>
               </grid>
             </constraints>
             <properties/>
@@ -40,7 +40,7 @@
           <scrollpane id="df8b2">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                <preferred-size width="500" height="300"/>
+                <preferred-size width="800" height="400"/>
               </grid>
             </constraints>
             <properties/>
@@ -52,6 +52,14 @@
               </component>
             </children>
           </scrollpane>
+          <component id="5a560" class="javax.swing.JButton" binding="runButton" default-binding="true">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="run"/>
+            </properties>
+          </component>
         </children>
       </grid>
     </children>

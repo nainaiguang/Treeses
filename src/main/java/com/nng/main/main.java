@@ -1,7 +1,6 @@
 package com.nng.main;
 
 import com.nng.HMI.Treeses;
-import com.nng.HMI_Text.text;
 
 
 import javax.swing.*;
@@ -19,6 +18,5 @@ public class main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-
     }
 }
