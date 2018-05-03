@@ -7,6 +7,8 @@ import com.nng.DBS.document_control.dml.insert.InsertControl;
 import com.nng.DBS.document_control.dml.update.updateControl;
 import com.nng.DBS.document_control.dql.select.selectControl;
 import com.nng.DBS.log.logControl.LogEngine;
+import com.nng.DBS.softParse.parseResult;
+import com.nng.DBS.softParse.softParse;
 import com.nng.lexical_analysis.analysis.SQLparsingEngine;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.SQLStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.ddl.DDLStatement;
@@ -16,6 +18,8 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dql.select.Sele
 import com.nng.lexical_analysis.contact.controlType;
 import lombok.Getter;
 
+import java.util.List;
+
 public class SQLEngine {
     @Getter
     String result=null;
@@ -24,14 +28,21 @@ public class SQLEngine {
 
         SQLparsingEngine a=new SQLparsingEngine(sql);
         long startTime=System.currentTimeMillis();//获取开始时间
-        SQLStatement b= a.parse();
-        System.out.println(b.getControlType());
+
+        SQLStatement b;
+        b=softParse.getInstance().getStatementFromExitsResult(sql);
+        if(b==null)//是否执行软解析
+        { b= a.parse();}
+
+
             if (b.getControlType() == controlType.CREATE) {
                 try {
                     createControl createControls = new createControl();
                     createControls.create_table((DDLStatement) b);
                     result = createControls.getResult();
                     (new LogEngine()).addNewLog(controlType.CREATE, sql, true);
+                    //只添加正确的软解析
+                    softParse.getInstance().addparseResult(sql,b);
                     }
                 catch (Exception oo)
                 {
@@ -46,6 +57,8 @@ public class SQLEngine {
                dropControls.drop_Table((DDLStatement) b);
                result=dropControls.getResult();
                 (new LogEngine()).addNewLog(controlType.DROP,sql,true);
+                    //只添加正确的软解析
+                    softParse.getInstance().addparseResult(sql,b);
                     }
                 catch (Exception oo)
                 {
@@ -59,6 +72,8 @@ public class SQLEngine {
                deleteControl deleteControls= new deleteControl((DMLStatement)b);
                result=deleteControls.getRes();
                 (new LogEngine()).addNewLog(controlType.DELETE,sql,true);
+                    //只添加正确的软解析
+                    softParse.getInstance().addparseResult(sql,b);
                 }
                 catch (Exception oo)
                 {
@@ -72,6 +87,8 @@ public class SQLEngine {
                 insertControl.insert_table((DMLStatement) b);
                 result=insertControl.getResult();
                 (new LogEngine()).addNewLog(controlType.INSERT,sql,true);
+                    //只添加正确的软解析
+                    softParse.getInstance().addparseResult(sql,b);
                 }
                 catch (Exception oo)
                 {
@@ -84,6 +101,8 @@ public class SQLEngine {
                updateControl updateControls= new updateControl((updateStatement) b);
                result=updateControls.getRes();
                 (new LogEngine()).addNewLog(controlType.UPDATE,sql,true);
+                    //只添加正确的软解析
+                    softParse.getInstance().addparseResult(sql,b);
                 }
                 catch (Exception oo)
                 {
@@ -96,6 +115,8 @@ public class SQLEngine {
                selectControl selectControls= new selectControl((SelectStatement) b);
                result= selectControls.getRes();
                 (new LogEngine()).addNewLog(controlType.SELECT,sql,true);
+                    //只添加正确的软解析
+                    softParse.getInstance().addparseResult(sql,b);
                 }
                 catch (Exception oo)
                 {
@@ -110,5 +131,15 @@ public class SQLEngine {
 
         long endTime=System.currentTimeMillis(); //获取结束时间
         result=result+"\n"+Double.parseDouble((endTime-startTime)+"")/1000+"s";
+
+
+
+        List<parseResult> o=softParse.getInstance().getParseResults();
+        for(parseResult results:o)
+        {
+            System.out.println(results.getSql());
+        }
     }
+
+
 }
