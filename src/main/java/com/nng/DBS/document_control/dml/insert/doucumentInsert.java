@@ -96,8 +96,8 @@ public class doucumentInsert {
                Object temps=condition.getShardingValue(Collections.singletonList(a)).getValue();
 
             result.add(temps);
-
         }
+
 
         //4
         if(result.size()!=doucument_column.size())

@@ -133,36 +133,19 @@ public class deleteControl {
      */
     private void deal_equalORNotequal()throws Exception
     {
+        //每一行
+        List<columnsType> columnsContentA=new ArrayList<>();
+        for(columnsType columnsTypes: crossjoinTables.getColumnsContent())
+        {
+            columnsContentA.add(columnsTypes);
+        }
         Iterator iter = conditions.getConditions().entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry entry = (Map.Entry) iter.next();
             Column key = (Column) entry.getKey();
             Condition val = (Condition) entry.getValue();
             if(val.getSymbol()!=Symbol.TILDE) {
-                if(val.getSymbol()==Symbol.EQ)
-                {
-                    val.setSymbol(Symbol.BANG_EQ);
-                }
-                else  if(val.getSymbol()==Symbol.BANG_EQ)
-                {
-                    val.setSymbol(Symbol.EQ);
-                }
-                else  if(val.getSymbol()==Symbol.LT_EQ)
-                {
-                    val.setSymbol(Symbol.GT);
-                }
-                else  if(val.getSymbol()==Symbol.LT)
-                {
-                    val.setSymbol(Symbol.GT_EQ);
-                }
-                else  if(val.getSymbol()==Symbol.GT_EQ)
-                {
-                    val.setSymbol(Symbol.LT);
-                }
-                else  if(val.getSymbol()==Symbol.GT)
-                {
-                    val.setSymbol(Symbol.LT_EQ);
-                }
+
                 this.crossjoinTables.ColumnEQorNotEQValues(key.getTableName(), key.getName(), val);
             }
             else{//是in或between
@@ -176,6 +159,15 @@ public class deleteControl {
                 }
             }
         }
+        List<columnsType> columnsContentB=new ArrayList<>();
+        for(columnsType columnsTypes: crossjoinTables.getColumnsContent())
+        {
+            columnsContentB.add(columnsTypes);
+        }
+        DeleteDemo deleteDemo=new DeleteDemo();
+        List<columnsType> columnsContentC=deleteDemo.removeDcate(columnsContentA,columnsContentB);
+
+        this.crossjoinTables.setColumnsContent(columnsContentC);
     }
 
     /**

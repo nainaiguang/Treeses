@@ -21,6 +21,7 @@ import com.nng.unit.sort.util.SortUtil;
 import com.nng.unit.sort.util.factory.SortUtilFactory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.poi.ss.formula.functions.T;
 
 import java.util.*;
@@ -34,6 +35,7 @@ public class crossjoinTable {
     //每一个表结构
     private List<table_structure> table_structures=new ArrayList<>();
     //每一行
+    @Setter
     private List<columnsType> columnsContent=new ArrayList<>();
 
     //结果表的每一个
