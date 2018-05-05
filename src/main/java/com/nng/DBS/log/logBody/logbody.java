@@ -11,10 +11,11 @@ import java.util.Date;
 @Getter
 @ToString
 public class logbody implements Serializable {
-    controlType sqlOperation;
-    String sql;
-    String success;
-    Date date;
+   private controlType sqlOperation;
+    private String sql;
+    private  String success;
+    private  Date date;
+
     public logbody(controlType sqlOperation, String sql, Boolean successs)
     {
         this.sqlOperation=sqlOperation;

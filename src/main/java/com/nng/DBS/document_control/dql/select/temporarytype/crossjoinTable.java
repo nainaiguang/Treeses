@@ -981,7 +981,7 @@ public class crossjoinTable {
                  place.add(getColumnPlace(tname,cname));
             }
 
-            System.out.println(place);//place为在笛卡尔表中的位置
+         //   System.out.println(place);//place为在笛卡尔表中的位置
 
 
             for(int pl:place)
@@ -1071,12 +1071,12 @@ public class crossjoinTable {
                 String colname=null;
                 String innerExpress=((AggregationSelectItem)selectItem).getInnerExpression();
                 innerExpress=innerExpress.substring(1,innerExpress.length()-1);//去除括号
-                System.out.println(innerExpress);
+              //  System.out.println(innerExpress);
                 String[] inner=strToArray(innerExpress);
                 if(inner.length==1)
                 {
                     tblname=getTablenameByColumn(inner[0]);
-                    System.out.println(inner[0]+"::::::");
+            //        System.out.println(inner[0]+"::::::");
                     colname=inner[0];
                 }
                 else if(inner.length==2)

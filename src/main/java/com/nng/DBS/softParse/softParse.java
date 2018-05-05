@@ -32,18 +32,18 @@ public class softParse {
     {
         for(parseResult result:parseResults)//不添加重复的声明
         {
-            if(result.getSql().equals(sql))
+            if(result.getHash()==sql.hashCode())
             {
                 return;
             }
         }
 
         if(parseResults.size()<=30){
-            parseResults.add(new parseResult(sql,sqlStatement));
+            parseResults.add(new parseResult(sql,sqlStatement,sql.hashCode()));
         }
         else
         {
-            parseResults.set(index,new parseResult(sql,sqlStatement));
+            parseResults.set(index,new parseResult(sql,sqlStatement,sql.hashCode()));
         }
         index++;
         if(index>29)
@@ -55,8 +55,9 @@ public class softParse {
     {
         for(parseResult result:parseResults)
         {
-            if(result.getSql().equals(sql))
+            if(result.getHash()==sql.hashCode())
             {
+             //   System.out.println(result.getHash());
                 return result.getSqlStatement();
             }
         }

@@ -41,7 +41,8 @@ public class documentUpdate {
                     fw.write('\n');
                     fw.close();
                 } catch (IOException e) {
-                    System.out.println("文件写入失败！" + e);
+                   // System.out.println("文件写入失败！" + e);
+                    throw e;
                 }
             }
             else
@@ -53,7 +54,8 @@ public class documentUpdate {
                     fw.write('\n');
                     fw.close();
                 } catch (IOException e) {
-                    System.out.println("文件写入失败！" + e);
+                  //  System.out.println("文件写入失败！" + e);
+                    throw e;
                 }
 
             }

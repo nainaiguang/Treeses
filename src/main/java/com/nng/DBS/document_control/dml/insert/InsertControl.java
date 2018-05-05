@@ -1,6 +1,5 @@
 package com.nng.DBS.document_control.dml.insert;
 
-import com.nng.lexical_analysis.analysis.mean_analyzer.statement.ddl.DDLStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.DMLStatement;
 import com.nng.lexical_analysis.analysis.mean_analyzer.statement.dml.insert.InsertStatement;
 import lombok.Getter;

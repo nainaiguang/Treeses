@@ -165,24 +165,24 @@ public class selectControl {
         deal_orderby();
 
         tidyResult(crossjoinTables);
-    for(columnsType oo:crossjoinTables.getColumnsContent())
-    {
-        for(Object pp:oo.getItem())
-        {
-            System.out.print(pp+"\t");
-        }
-        System.out.println();
-    }
-
-    for(selectItemResult sl:crossjoinTables.getResultTable_structures())
-    {
-        System.out.printf(sl.getItemname()+":");
-        for(Object obj:sl.getColumn_content())
-        {
-            System.out.printf(obj+"\t");
-        }
-        System.out.println();
-    }
+//    for(columnsType oo:crossjoinTables.getColumnsContent())
+//    {
+//        for(Object pp:oo.getItem())
+//        {
+//            System.out.print(pp+"\t");
+//        }
+//        System.out.println();
+//    }
+//
+//    for(selectItemResult sl:crossjoinTables.getResultTable_structures())
+//    {
+//        System.out.printf(sl.getItemname()+":");
+//        for(Object obj:sl.getColumn_content())
+//        {
+//            System.out.printf(obj+"\t");
+//        }
+//        System.out.println();
+//    }
 
     }
     private void tidyResult(crossjoinTable crossjoinTables)

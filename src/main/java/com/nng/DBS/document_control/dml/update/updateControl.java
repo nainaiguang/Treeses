@@ -68,7 +68,7 @@ public class updateControl {
 
         //System.out.println(dmlStatement);
 
-        System.out.println(dmlStatement.getSqlTokens());
+      //  System.out.println(dmlStatement.getSqlTokens());
         if(dmlStatement.getTables().getTableNames().size()>1)
         {
             throw new Exception("update only support one table in one time");
@@ -118,7 +118,7 @@ public class updateControl {
         {
             this.rs.add(i);
         }
-        System.out.println(rs+";;;;;;");
+      //  System.out.println(rs+";;;;;;");
     }
 
     /**
@@ -197,7 +197,7 @@ public class updateControl {
                     val.setSymbol(Symbol.LT_EQ);
                 }
                 List<Integer> temp=this.crossjoinTables.updatechangeContent(key.getTableName(), key.getName(), val);//不符合的项
-                System.out.println(temp);
+             //   System.out.println(temp);
                     rs=getRepetition(rs,temp);
             }
             else{//是in或between
@@ -211,7 +211,7 @@ public class updateControl {
                 }
             }
 
-            System.out.println(rs+";;;;;;");
+          //  System.out.println(rs+";;;;;;");
 
 
 
@@ -349,15 +349,10 @@ public class updateControl {
                 {
                     throw new documentException(DefaultKeyword.INT.toString(),this.setcontents.get(i).getClass().getSimpleName(),1);
                 }
+
                 for(int j=0;j<rs.size();j++)//改变位置的行
                 {
-                    System.out.println(ro+"nihaos");
                     crossjoinTables.getColumnsContent().get(rs.get(j)).getItem().set(lieplace,ro);
-                    for(int z=0;z<crossjoinTables.getColumnsContent().size();z++)
-                    {
-                        System.out.println(crossjoinTables.getColumnsContent().get(z).getItem());
-                    }
-
                 }
             }
             else if(type.equals(DefaultKeyword.VARCHAR.toString()))

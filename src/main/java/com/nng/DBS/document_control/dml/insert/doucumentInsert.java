@@ -241,7 +241,8 @@ public class doucumentInsert {
             fw.write('\n');
             fw.close();
         } catch (IOException e) {
-            System.out.println("文件写入失败！" + e);
+           // System.out.println("文件写入失败！" + e);
+            throw e;
         }
     }
 

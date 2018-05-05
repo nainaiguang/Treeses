@@ -11,4 +11,5 @@ import lombok.ToString;
 public class parseResult {
     private  String sql;
     private SQLStatement sqlStatement;
+    private int hash;
 }

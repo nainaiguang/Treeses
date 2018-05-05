@@ -135,10 +135,10 @@ public class SQLEngine {
 
 
         List<parseResult> o=softParse.getInstance().getParseResults();
-        for(parseResult results:o)
-        {
-            System.out.println(results.getSql());
-        }
+//        for(parseResult results:o)
+//        {
+//            System.out.println(results.getSql());
+//        }
     }
 
 
