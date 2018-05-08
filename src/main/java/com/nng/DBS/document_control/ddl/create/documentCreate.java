@@ -33,6 +33,7 @@ public class documentCreate {
              if (!myFilePath.exists())
                  {
                      myFilePath.createNewFile();
+                     myFilePath.setWritable(false);
                  }
              }
 

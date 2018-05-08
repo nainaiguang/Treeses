@@ -45,6 +45,7 @@ public class crossjoinTable {
     private GroupbyResult groupbyResults;
 
     private Boolean Aggregat=false;
+    @Setter
     private Boolean Groupby=false;
 
     //不同表同名情况也不怕，靠在笛卡尔中列的位置来辨认
@@ -911,6 +912,18 @@ public class crossjoinTable {
     }
 
 
+
+
+    public void checkAv(List<SelectItem> items)
+    {
+        for(int i=0;i<items.size();i++)//看看有没有聚合
+        {
+            if(items.get(i).getClass().toString().equals("class com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.AggregationSelectItem"))
+            {
+                Aggregat=true;
+            }
+        }
+    }
     /**
      * select item
      * 1.没有聚合，没有group by
@@ -1132,7 +1145,8 @@ public class crossjoinTable {
         {
 
             for(SelectItem selectItem:items) {
-                if (selectItem.getClass().toString().equals("com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.CommonSelectItem")) {
+                System.out.println(selectItem.getClass().toString());
+                if (selectItem.getClass().toString().equals("class com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.CommonSelectItem")) {
                     String tblname = null;
                     String colname = null;
                     String innerExpress = (selectItem).getExpression();
@@ -1160,7 +1174,9 @@ public class crossjoinTable {
                     this.resultTable_structures.add(ItemResult);
 
 
-                } else if (selectItem.getClass().toString().equals("com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.CommonSelectItem")) {
+                } else if (selectItem.getClass().toString().equals("class com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.AggregationSelectItem")) {
+
+
                     String tblname = null;
                     String colname = null;
                     /**
@@ -1184,32 +1200,57 @@ public class crossjoinTable {
                     if (((AggregationSelectItem) selectItem).getType().equals(AggregationType.SUM)) {
                         List<Double> sum = SUM(tblname, colname, groupbyResults);
                         selectItemResult ItemResult = new selectItemResult(tblname, colname);
+                        ItemResult.setItemname("SUM("+ItemResult.getItemname()+")");
                         ItemResult.setItemname(selectItem.getAlias().orNull());
-                        ItemResult.setColumn_content(Collections.singletonList(sum));
+                        for(int i=0;i<sum.size();i++)
+                        {
+                            ItemResult.getColumn_content().add(sum.get(i));
+                        }
+                        //ItemResult.setColumn_content(Collections.singletonList(sum));
                         this.resultTable_structures.add(ItemResult);
                     } else if (((AggregationSelectItem) selectItem).getType().equals(AggregationType.COUNT)) {
                         List<Integer> count = COUNT(tblname, colname, groupbyResults);
                         selectItemResult ItemResult = new selectItemResult(tblname, colname);
+                        ItemResult.setItemname("COUNT("+ItemResult.getItemname()+")");
                         ItemResult.setItemname(selectItem.getAlias().orNull());
-                        ItemResult.setColumn_content(Collections.singletonList(count));
+                        for(int i=0;i<count.size();i++)
+                        {
+                            ItemResult.getColumn_content().add(count.get(i));
+                        }
+                       // ItemResult.setColumn_content(Collections.singletonList(count));
                         this.resultTable_structures.add(ItemResult);
                     } else if (((AggregationSelectItem) selectItem).getType().equals(AggregationType.MAX)) {
                         List<Object> max = MAX(tblname, colname, groupbyResults);
                         selectItemResult ItemResult = new selectItemResult(tblname, colname);
+                        ItemResult.setItemname("MAX("+ItemResult.getItemname()+")");
                         ItemResult.setItemname(selectItem.getAlias().orNull());
-                        ItemResult.setColumn_content(Collections.singletonList(max));
+                        for(int i=0;i<max.size();i++)
+                        {
+                            ItemResult.getColumn_content().add(max.get(i));
+                        }
+                      //  ItemResult.setColumn_content(Collections.singletonList(max));
                         this.resultTable_structures.add(ItemResult);
                     } else if (((AggregationSelectItem) selectItem).getType().equals(AggregationType.MIN)) {
                         List<Object> min = MIN(tblname, colname, groupbyResults);
                         selectItemResult ItemResult = new selectItemResult(tblname, colname);
+                        ItemResult.setItemname("MIN("+ItemResult.getItemname()+")");
                         ItemResult.setItemname(selectItem.getAlias().orNull());
-                        ItemResult.setColumn_content(Collections.singletonList(min));
+                        for(int i=0;i<min.size();i++)
+                        {
+                            ItemResult.getColumn_content().add(min.get(i));
+                        }
+                       // ItemResult.setColumn_content(Collections.singletonList(min));
                         this.resultTable_structures.add(ItemResult);
                     } else if (((AggregationSelectItem) selectItem).getType().equals(AggregationType.AVG)) {
                         List<Double> agv = AGV(tblname, colname, groupbyResults);
                         selectItemResult ItemResult = new selectItemResult(tblname, colname);
-                        ItemResult.setItemname(selectItem.getAlias().orNull());
-                        ItemResult.setColumn_content(Collections.singletonList(agv));
+                        ItemResult.setItemname("AGV("+ItemResult.getItemname()+")");
+                       ItemResult.setItemname(selectItem.getAlias().orNull());
+                        for(int i=0;i<agv.size();i++)
+                        {
+                            ItemResult.getColumn_content().add(agv.get(i));
+                        }
+                       // ItemResult.setColumn_content(Collections.singletonList(agv));
                         this.resultTable_structures.add(ItemResult);
                     }
                 }
@@ -1766,7 +1807,7 @@ public class crossjoinTable {
          * 正片开始
          */
 
-        if(Aggregat==false &&Groupby==false) {
+        if((Aggregat==false &&Groupby==false)) {
             int columnplace = getColumnPlace(tablename, columnname);
             if (columnplace == -1)//列不存在
             {
@@ -1884,7 +1925,127 @@ public class crossjoinTable {
 
 
         }
+
+
+
+        if((Aggregat==true &&Groupby==true)) {
+            int columnplace = getColumnPlace(tablename, columnname);
+            if (columnplace == -1)//列不存在
+            {
+                throw new documentException(columnname);
+            }
+
+            String type = TablerParser.getInstance().get_column_type(tablename, columnname);
+            if (type.equals("VARCHAR")) {
+                SortUtil<String> stringSortUtil = (SortUtil<String>) SortUtilFactory.createSortUtil("string");
+                Map<Integer, String> sort = new HashMap<>();
+                for (int i = 0; i < columnsContent.size(); i++)//把要排序的列写成map(i,object)
+                {
+                    sort.put(i, columnsContent.get(i).getItem().get(columnplace).toString());
+                }
+                Map<Integer, String> resultMap = stringSortUtil.rank(sort, perface);
+
+                List<Integer> newplace = new ArrayList<>();
+                for (Map.Entry<Integer, String> entry : resultMap.entrySet()) {
+                    newplace.add(entry.getKey());
+                }
+                //结果表的每一个
+                List<columnsType> temp=new ArrayList<>();
+                for(Integer i:newplace)
+                {
+                    temp.add(columnsContent.get(i));
+                }
+                columnsContent=temp;
+
+            } else if (type.equals("CHAR")) {
+                SortUtil<Character> stringSortUtil = (SortUtil<Character>) SortUtilFactory.createSortUtil("char");
+                Map<Integer, Character> sort = new HashMap<>();
+                for (int i = 0; i < columnsContent.size(); i++)//把要排序的列写成map(i,object)
+                {
+                    sort.put(i, columnsContent.get(i).getItem().get(columnplace).toString().charAt(0));
+                }
+                Map<Integer, Character> resultMap = stringSortUtil.rank(sort, perface);
+
+                List<Integer> newplace = new ArrayList<>();
+                for (Map.Entry<Integer, Character> entry : resultMap.entrySet()) {
+                    newplace.add(entry.getKey());
+                }
+                //结果表的每一个
+                List<columnsType> temp=new ArrayList<>();
+                for(Integer i:newplace)
+                {
+                    temp.add(columnsContent.get(i));
+                }
+                columnsContent=temp;
+
+            } else if (type.equals("INT")) {
+                SortUtil<Integer> stringSortUtil = (SortUtil<Integer>) SortUtilFactory.createSortUtil("int");
+                Map<Integer, Integer> sort = new HashMap<>();
+                for (int i = 0; i < columnsContent.size(); i++)//把要排序的列写成map(i,object)
+                {
+                    sort.put(i, Integer.parseInt(columnsContent.get(i).getItem().get(columnplace).toString()));
+                }
+                Map<Integer, Integer> resultMap = stringSortUtil.rank(sort, perface);
+
+                List<Integer> newplace = new ArrayList<>();
+                for (Map.Entry<Integer, Integer> entry : resultMap.entrySet()) {
+                    newplace.add(entry.getKey());
+                }
+                //结果表的每一个
+                List<columnsType> temp=new ArrayList<>();
+                for(Integer i:newplace)
+                {
+                    temp.add(columnsContent.get(i));
+                }
+                columnsContent=temp;
+            } else if (type.equals("DOUBLE")) {
+                SortUtil<Double> stringSortUtil = (SortUtil<Double>) SortUtilFactory.createSortUtil("double");
+                Map<Integer, Double> sort = new HashMap<>();
+                for (int i = 0; i < columnsContent.size(); i++)//把要排序的列写成map(i,object)
+                {
+                    sort.put(i, Double.parseDouble(columnsContent.get(i).getItem().get(columnplace).toString()));
+                }
+                Map<Integer, Double> resultMap = stringSortUtil.rank(sort, perface);
+
+                List<Integer> newplace = new ArrayList<>();
+                for (Map.Entry<Integer, Double> entry : resultMap.entrySet()) {
+                    newplace.add(entry.getKey());
+                }
+                //结果表的每一个
+                List<columnsType> temp=new ArrayList<>();
+                for(Integer i:newplace)
+                {
+                    temp.add(columnsContent.get(i));
+                }
+                columnsContent=temp;
+            } else if (type.equals("FLOAT")) {
+                SortUtil<Float> stringSortUtil = (SortUtil<Float>) SortUtilFactory.createSortUtil("float");
+                Map<Integer, Float> sort = new HashMap<>();
+                for (int i = 0; i <columnsContent.size(); i++)//把要排序的列写成map(i,object)
+                {
+                    sort.put(i, Float.parseFloat(columnsContent.get(i).getItem().get(columnplace).toString()));
+                }
+                Map<Integer, Float> resultMap = stringSortUtil.rank(sort, perface);
+
+                List<Integer> newplace = new ArrayList<>();
+                for (Map.Entry<Integer, Float> entry : resultMap.entrySet()) {
+                    newplace.add(entry.getKey());
+                }
+                //结果表的每一个
+                List<columnsType> temp=new ArrayList<>();
+                for(Integer i:newplace)
+                {
+                    temp.add(columnsContent.get(i));
+                }
+                columnsContent=temp;
+            }
+
+
+        }
+
     }
+
+
 
 
 
@@ -1900,49 +2061,6 @@ public class crossjoinTable {
             return false;
         else return true;
     }
-
-    /**
-     *values 为输入值 其中Interger 为编号，不用管
-     * 根据object  对list里面的Map进行排序，interger的值不用变
-     * 如一开始
-     * list里面的值是
-     * <1,b>
-     * <2,a>
-     * <3,e>
-     * <4,d>
-     * <5,c>
-     *
-     * 排序后的值为
-     *
-     * <2,a>
-     * <1,b>
-     * <5,c>
-     * <4,d>
-     * <3,e>
-     *
-     * 键值对还是和原来一样，但是根据object进行排序
-     *
-     * object有5种类型，1，string,2.char,3.int,4.double,5,float
-     * type参数表示这5种类型
-     * type.equals("CLASS JAVA.LANG.INTEGER")
-     * type.equals("CLASS JAVA.LANG.FLOAT")
-     * type.equals("CLASS JAVA.LANG.DOUBLE"))
-     * type.equals("CLASS JAVA.LANG.CHARACTER")
-     * type.equals("CLASS JAVA.LANG.STRING")
-     *
-     * ordertype 为升序降序  其中有两种
-     * values.equals.("ASC")
-     * values.equals.("DESC")
-     *
-     * 返回参数和输入参数的list一样的类型即可
-     *
-     * 注意一个问题  深拷贝浅拷贝的问题，不要对values 直接进行排序，会出错，新建一个List<Map<Integer,Object>>用来存结果
-     */
-    public List<Map<Integer,Object>> rank(List<Map<Integer,Object>> values,String ordertype,String type)
-    {
-        return null;
-    }
-
 
 
     // private List<columnsType> columnsContent=new ArrayList<>();

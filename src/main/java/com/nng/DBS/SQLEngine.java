@@ -32,9 +32,13 @@ public class SQLEngine {
         SQLStatement b;
         b=softParse.getInstance().getStatementFromExitsResult(sql);
         if(b==null)//是否执行软解析
-        { b= a.parse();}
-
-
+        {
+            b= a.parse();
+        }
+        else
+        {
+            (new LogEngine()).addNewLog(b.getControlType(), sql, true);
+        }
             if (b.getControlType() == controlType.CREATE) {
                 try {
                     createControl createControls = new createControl();

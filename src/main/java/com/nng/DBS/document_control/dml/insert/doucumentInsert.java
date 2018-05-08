@@ -234,6 +234,8 @@ public class doucumentInsert {
     private void write_Table(String table_name,JSONArray content) throws Exception {
         String strs = content.toString();
         String table_path= TablerParser.getInstance().get_address(table_name);
+        File o=new File(table_path);
+        o.setWritable(true);
         try {
             //构造函数中的第二个参数true表示以追加形式写文件
             FileWriter fw = new FileWriter(table_path,true);
@@ -244,6 +246,7 @@ public class doucumentInsert {
            // System.out.println("文件写入失败！" + e);
             throw e;
         }
+        o.setWritable(false);
     }
 
 

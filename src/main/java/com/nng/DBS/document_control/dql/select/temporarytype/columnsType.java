@@ -1,11 +1,11 @@
 package com.nng.DBS.document_control.dql.select.temporarytype;
 
+import com.google.common.base.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -16,4 +16,5 @@ import java.util.List;
 @Getter
 public class columnsType {
    private List<Object> item=new ArrayList<>();
+
 }

@@ -9,7 +9,6 @@ import com.nng.lexical_analysis.analysis.mean_analyzer.expression.NumberExpressi
 import com.nng.lexical_analysis.analysis.mean_analyzer.expression.PropertyExpression;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.OrderItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.Column;
-import com.nng.lexical_analysis.analysis.mean_analyzer.relation.condition.columnCondition;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.AggregationSelectItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.CommonSelectItem;
 import com.nng.lexical_analysis.analysis.mean_analyzer.relation.selectitem.SelectItem;

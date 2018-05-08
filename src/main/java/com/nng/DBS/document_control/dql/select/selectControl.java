@@ -160,6 +160,7 @@ public class selectControl {
 
         deal_groupby();
 
+
         deal_selectitem();
 
         deal_orderby();
@@ -315,6 +316,13 @@ public class selectControl {
         //处理列相等的事务
         deal_on();
         deal_equalORNotequal();
+        crossjoinTables.checkAv(items);
+        if(groupByItems.size()!=0)
+        {
+            crossjoinTables.setGroupby(true);
+        }
+        deal_orderby();
+        crossjoinTables.setGroupby(false);
     }
 
 
@@ -393,6 +401,7 @@ public class selectControl {
             throw new Exception("sorry,group by only support 1 item now");
         }
         this.crossjoinTables.GroupBy(selectStatement.getTables(),groupByItems.get(0));
+
     }
     private void deal_orderby() throws Exception
     {
@@ -404,7 +413,6 @@ public class selectControl {
         {
             throw new Exception("sorry,order by only support 1 item now");
         }
-
         Boolean paixu=false;
         if(orderByItems.get(0).getType()== OrderType.DESC)
         {

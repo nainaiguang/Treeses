@@ -4,6 +4,7 @@ import com.nng.DBS.dictionary.domParser.tableparser.TablerParser;
 import com.nng.DBS.document_control.dql.select.temporarytype.columnsType;
 import net.sf.json.JSONArray;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,11 +34,14 @@ public class doucumentDelete {
         {
             String strs = content.get(i).toString();
             String table_path= TablerParser.getInstance().get_address(table_name);
+            File o=new File(table_path);
+            o.setWritable(true);
             if(i==0)
             {
                 try {
                     //构造函数中的第二个参数true表示以追加形式写文件
                     FileWriter fw = new FileWriter(table_path,false);
+
                     fw.write(strs);
                     fw.write('\n');
                     fw.close();
@@ -58,8 +62,8 @@ public class doucumentDelete {
                    // System.out.println("文件写入失败！" + e);
                     throw e;
                 }
-
             }
+            o.setWritable(false);
         }
 
 

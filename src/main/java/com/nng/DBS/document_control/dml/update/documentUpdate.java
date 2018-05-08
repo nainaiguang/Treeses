@@ -4,6 +4,7 @@ import com.nng.DBS.dictionary.domParser.tableparser.TablerParser;
 import com.nng.DBS.document_control.dql.select.temporarytype.columnsType;
 import net.sf.json.JSONArray;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ public class documentUpdate {
         {
             String strs = content.get(i).toString();
             String table_path= TablerParser.getInstance().get_address(table_name);
+            File o=new File(table_path);
+            o.setWritable(true);
             if(i==0)
             {
                 try {
@@ -59,6 +62,7 @@ public class documentUpdate {
                 }
 
             }
+            o.setWritable(false);
         }
 
 
