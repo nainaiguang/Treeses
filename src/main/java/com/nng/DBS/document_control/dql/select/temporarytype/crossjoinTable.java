@@ -129,7 +129,7 @@ public class crossjoinTable {
             {
                 columnsType temp=columnsContent.get(i);
 
-                if(!((String)temp.getItem().get(cloumnplaceA)).equals((String)temp.getItem().get(cloumnplaceB)))
+                if(!(temp.getItem().get(cloumnplaceA).toString()).equals(temp.getItem().get(cloumnplaceB).toString()))
                 {
                     move.add(i);
                 }
@@ -151,7 +151,7 @@ public class crossjoinTable {
             for(int i=0;i<this.columnsContent.size();i++)
             {
                 columnsType temp=columnsContent.get(i);
-                if(!(((double)temp.getItem().get(cloumnplaceA))==((double)temp.getItem().get(cloumnplaceB))))
+                if(!((Double.parseDouble(temp.getItem().get(cloumnplaceA).toString()))==((Double.parseDouble(temp.getItem().get(cloumnplaceB).toString())))))
                 {
                     move.add(i);
                 }
@@ -899,15 +899,19 @@ public class crossjoinTable {
         int columnplace=getColumnPlace(tablename,columnname);
 
 
-        List<Object> results=new ArrayList<>();
+        List<Object> resultsss=new ArrayList<>();
         for(int i=0;i<this.columnsContent.size();i++) {
             columnsType temp=columnsContent.get(i);
-            if(results.indexOf(temp.getItem().get(columnplace))==-1)
+            if(resultsss.size()==0) {
+                resultsss.add(temp.getItem().get(columnplace));
+                continue;
+            }
+            if(resultsss.indexOf(temp.getItem().get(columnplace))==-1)
             {
-                results.add(temp.getItem().get(columnplace));
+                resultsss.add(temp.getItem().get(columnplace));
             }
         }
-        this.groupbyResults=new GroupbyResult(tablename,columnname,columnplace,results);
+        this.groupbyResults=new GroupbyResult(tablename,columnname,columnplace,resultsss);
         Groupby=true;//设置有groupby项
     }
 

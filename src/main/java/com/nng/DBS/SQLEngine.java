@@ -27,7 +27,7 @@ public class SQLEngine {
     {
 
         SQLparsingEngine a=new SQLparsingEngine(sql);
-        long startTime=System.currentTimeMillis();//获取开始时间
+
 
         SQLStatement b;
         b=softParse.getInstance().getStatementFromExitsResult(sql);
@@ -39,6 +39,7 @@ public class SQLEngine {
         {
             (new LogEngine()).addNewLog(b.getControlType(), sql, true);
         }
+        long startTime=System.currentTimeMillis();//获取开始时间
             if (b.getControlType() == controlType.CREATE) {
                 try {
                     createControl createControls = new createControl();
